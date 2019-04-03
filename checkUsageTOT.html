@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <script src="dist/papaparse.js"></script>
+  <script src="dist/jquery-1.8.3.min.js"></script>
+  <script src="dist/foundation.min.js"></script>
+  <script src="dist/vue.js"></script>
+  <!--<script src="dist/vue2-filters.min.js"></script>-->
+  <!--<script src="https://cdn.jsdelivr.net/npm/vue2-filters/dist/vue2-filters.min.js"></script>-->
+  <!--<script src="http://peterolson.github.com/BigInteger.js/BigInteger.min.js"></script>-->
+  <script src="dist/BigInteger.min.js"></script>
+  <link rel="stylesheet" href="dist/foundation.min.css">
+  <script src="dist/xlsx.full.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.10/lodash.js"></script>
+
+  <script>
+
+
+
+    var calldate = new Array(), voice_record = new Array(), voice_sec = new Array(), sms = new Array();
+    var data_record = new Array(), data_vol =new Array();
+    var total_day = 0;
+    var csvfile;
+    var jsonAwn;
+    var data_Total = bigInt(),sms_Total = bigInt(), voiceSEC_Total = bigInt(); // voiceREC_Total = bigInt();
+    var monthUsage,year;
+    const dc = XLSX.utils.decode_cell,
+      ec = (r, c) => { return XLSX.utils.encode_cell({r: r, c: c}); };
+    var realdata = [];
+    var usage_date;
+    function findTable(sheet, range, colMap) {
+      let firstRow = null,
+        colsToFind = _.keys(colMap).length,
+
+        // colmap lowercase title -> prop
+        colLookup = _.reduce(colMap, (m, v, k) => { m[_.isString(v)? v.toLowerCase() : v] = k; return m; }, {}),
+
+        // colmap props -> 0-indexed column
+        columns = _.reduce(colMap, (m, v, k) => { m[k] = null; return m; }, {});
+
+      // Look for header row and extract columns
+      for(let r = range.min.r; r <= range.max.r - 1; ++r) {
+        let colsFound = 0;
+
+        for(let c = range.min.c; c <= range.max.c; ++c) {
+          let cell = sheet[ec(r, c)];
+
+          if(cell && cell.v !== undefined) {
+            let prop = colLookup[cell.t === 's'? cell.v.toLowerCase() : cell.v];
+            if(prop) {
+              columns[prop] = c;
+              ++colsFound;
+            }
+          }
+        }
+
+        if(colsFound === colsToFind) {
+          firstRow = r + 1;
+          break;
+        }
+      }
+
+      return { columns, firstRow };
+    }
+    function readTable(sheet, range, columns, firstRow, stop) {
+      let data = [];
+
+      for(let r = firstRow; r <= range.max.r; ++r) {
+        let row = _.reduce(columns, (m, c, k) => {
+          let cell = sheet[ec(r, c)];
+          m[k] = cell? cell.v : null;
+          return m;
+        }, {});
+
+        if(stop && stop(row)) {
+          break;
+        }
+
+        data.push(row);
+      }
+
+      return data;
+    }
+
+
+    function setMonthUsage(jsonObj,month, newVoice,newSMS,newData) {
+/*      for (var i=0; i<jsonObj.data.length; i++) {
+        if (jsonObj.data[i].month === month) {
+          jsonObj.data[i].voice = newVoice;
+          jsonObj.data[i].sms = newSMS;
+          jsonObj.data[i].data = newData;
+          console.log("Updated :",jsonObj);
+          return;
+        }
+      }*/
+    }
+
+    function checkSUMofData(totalindex){
+
+      let tempTotal = bigInt();
+
+      for (i = 0; i < (totalindex); i++) {
+
+        tempTotal = tempTotal.add(bigInt(realdata[i].data_volume));
+      }
+      console.log(tempTotal.toString());
+      let csvTotal = bigInt(realdata[totalindex].data_volume);
+      // console.log('arry ='+tempStr);
+
+      console.log(csvTotal.toString());
+      //if (tempTotal.toString()===arry[totalindex].replace(' ', '').replace(/,/g, '')) {
+      if (tempTotal.equals(csvTotal)) {
+        console.log('SUM correct');
+      }
+      else
+        console.log('SUM error');
+      vm_checkCSV.dataJS = tempTotal.toString();
+      vm_checkCSV.dataEXCEL = csvTotal.toString();
+      vm_checkCSV.dataDIFF = tempTotal.minus(csvTotal).toString();
+    }
+    function handleFileSelect(evt) {
+      csvfile= evt.target.files[0];
+      calldate = new Array(); voice_record = new Array(); voice_sec = new Array(); sms = new Array();
+      data_record = new Array(), data_vol =new Array();
+      total_day = 0;
+      data_Total = bigInt(),sms_Total = bigInt(), voiceSEC_Total = bigInt();
+      Papa.parse(csvfile, {
+        download: true,
+        header: false,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+        complete: function (results) {
+
+          console.log("Complete : ",results);
+          $.each(results.data, function (rowNo, rowObj) {
+
+            //console.log("rowNo = ", rowNo);
+            //console.log("row = ", rowObj);
+            $.each(rowObj, function (colName, cell) {
+
+              // console.log("colName = ", colName);
+              switch (colName) {
+                case 0 : calldate[rowNo] = cell;
+                  if (cell !== ''){
+                    if(cell.replace(' ', '').toUpperCase() !=='TOTAL') // USAGE
+                      total_day = total_day +1;
+                  }
+                  break;
+                case 1 : voice_record[rowNo] = cell; break;
+                case 2 : voice_sec[rowNo]= cell; break;
+                case 3 : sms[rowNo]= cell ;break;
+                case 4 : data_record[rowNo]= cell;break;
+                case 5 : data_vol[rowNo] = cell;break;
+                default : ;// console.log ("don't care");
+              }
+
+            });
+
+          });
+          monthUsage =  calldate[0].substring(2,3); // calldate[0].substring(3,5)
+          year = calldate[0].substring(4); // calldate[0].substring(6)
+          console.log("month = "+monthUsage);
+          console.log('year = '+year);
+          console.log('TOTAL ='+total_day);
+          console.log(voice_sec[total_day]);
+          console.log(sms[total_day]);
+          console.log(data_vol[total_day]);
+          data_Total = checkSUM(data_vol,total_day);
+          sms_Total = checkSUM(sms,total_day);
+          voiceSEC_Total = checkSUM(voice_sec,total_day);
+
+          console.log('data_Total ='+data_Total.toString());
+          vm_checkCSV.dataJS =  data_Total.toString();
+          vm_checkCSV.dataEXCEL = data_vol[total_day];
+          let tempdata = bigInt(data_vol[total_day].replace(' ', '').replace(/,/g, '').trim());
+          vm_checkCSV.dataDIFF = data_Total.minus(tempdata).toString();
+          vm_checkCSV.smsJS = sms_Total.toString();
+          vm_checkCSV.smsEXCEL = sms[total_day];
+          let tempsms = bigInt(sms[total_day].replace(' ', '').replace(/,/g, '').trim());
+          vm_checkCSV.smsDIFF = sms_Total.minus(tempsms).toString();
+          vm_checkCSV.voiceJS = voiceSEC_Total.toString();
+          vm_checkCSV.voiceEXCEL = voice_sec[total_day];
+          let tempvoice = bigInt(voice_sec[total_day].replace(' ', '').replace(/,/g, '').trim());
+          vm_checkCSV.voiceDIFF = voiceSEC_Total.minus(tempvoice).toString();
+
+        }
+
+
+      });
+
+    }
+    function handleTextSelect(e) {
+    const TOT_SHEET = 0;
+    const AWN_SHEET = 1;
+    let rangeTOT = {min: {r: 2, c: 0}, max: {r: 63, c:16}};
+      var files = e.target.files;
+      var i,f;
+      for (i = 0, f = files[i]; i != files.length; ++i) {
+        var reader = new FileReader();
+        var name = f.name;
+        reader.onload = function(e) {
+          var data = e.target.result;
+
+          var workbook2 = XLSX.read(data, {type: 'binary',cellDates:true});
+          console.log(workbook2);
+          var tot_sheet_name = workbook2.SheetNames[TOT_SHEET];
+          var awn_sheet_name = workbook2.SheetNames[AWN_SHEET];
+          //console.log(tot_sheet_name);
+          console.log(awn_sheet_name);
+          // make sure correct sheet name
+/*          if (tot_sheet_name === SN_IV_SUMMARY_NAME ){
+            console.log('same zero sheet');
+          } else {
+            alert('wrong zero sheet');
+            throw new Error("Error: Can not find sheet : "+tot_sheet_name);
+          }
+          if (awn_sheet_name === SN_SUMMARY_NAME ){
+            console.log('same 1st sheet');
+          } else {
+            alert('wrong 1st sheet');
+            throw new Error("Error: Can not find sheet : "+awn_sheet_name);
+          }
+          if (third_sheet_name === SN_DAILY_NAME ){
+            console.log('same 3rd sheet');
+          } else {
+            alert('wrong 3rd sheet');
+            throw new Error("Error: Can not find sheet : "+third_sheet_name);
+          }*/
+
+          /* Get worksheet */
+          var tot_worksheet = workbook2.Sheets[tot_sheet_name];
+          var awn_worksheet = workbook2.Sheets[awn_sheet_name];
+
+          let ref = tot_worksheet['!ref'];
+          console.log("ref :",ref);
+          if(tot_worksheet === null) {
+            console.log("First Sheet is NULL");
+          } else {
+            console.log("First Sheet : ",tot_worksheet);
+          }
+          if(!ref && ref.indexOf(':') === -1) {
+            throw new Error("Malformed workbook - no !ref property");
+          }
+          console.log("before :",rangeTOT);
+          rangeTOT.min = dc(ref.split(':')[0]);
+          rangeTOT.max = dc(ref.split(':')[1]);
+          console.log("after :",rangeTOT);
+          let { columns, firstRow } = findTable(tot_worksheet, rangeTOT, {
+            file_date: "FILE_DATE",
+            call_date: "CALL_DATE",
+            local_record: "MOC(LOCAL) - RECORD",
+            local_duration: "MOC(LOCAL) - DURATION(SEC.)",
+            idd_record: "MOC(IDD) - RECORD",
+            idd_duration: "MOC(IDD) - DURATION(SEC.)",
+            video_record: "MOC(VIDEO) - RECORD",
+            video_duration: "MOC(VIDEO) - DURATION(SEC.)",
+            voice_record: "TOTAL MOC - RECORD",
+            voice_duration: "TOTAL MOC - DURATION(SEC.)",
+            mtc_record: "MTC - RECORD",
+            mtc_duration: "MTC - DURATION(SEC.)",
+            sms_transaction: "SMS MO - TRANSACTION",
+            sms_mt_trans: "SMS MT - TRANSACTION",
+            data_record: "DATA - RECORD",
+            data_volume: "DATA - VOLUME(BYTE)"
+          });
+console.log("column is ",columns);
+          if(firstRow === null) {
+            console.log("First Row is NULL");
+          } else {
+            console.log("First Row : ",firstRow);
+          }
+          const totdata = readTable(tot_worksheet, rangeTOT, columns, firstRow, (row) => false);
+          console.log(totdata);
+          realdata = totdata.filter((member) => {
+            return member.data_record !== null
+          });
+          console.log(realdata[realdata.length-1]);
+          usage_date = formatDate(realdata[10].call_date);
+          console.log("Date is ",usage_date);
+          checkSUMofData(realdata.length-1);
+
+
+        };
+        reader.readAsBinaryString(f);
+      }
+
+    }
+    function formatDate(date) {
+      var d = new Date(date),
+        month = '' + (d.getMonth() + 1),
+        day = '' + d.getDate(),
+        year = d.getFullYear();
+
+      if (month.length < 2) month = '0' + month;
+      if (day.length < 2) day = '0' + day;
+
+      return [year, month, day].join('-');
+    }
+    function downloadCSV(args) {
+      let data, filename, link;
+
+      //setMonthUsage(jsonAwn,tempDateStr,voiceSEC_Total.toString(),sms_Total.toString(),data_Total.toString());     //  ทำปุ่ม update usage file แล้วย้ายอันนี้ไปไว้ โดยเอาค่า calldate[total_day-1].split("/").reverse().join("-")
+      const test = {
+        month: usage_date,
+        voice: realdata[realdata.length-1].voice_duration,
+        sms: realdata[realdata.length-1].sms_transaction,
+        data: realdata[realdata.length-1].data_volume};
+      jsonAwn.data.push(test);
+      console.log("After add : ",jsonAwn);
+      var csv = Papa.unparse(jsonAwn);
+      if (csv == null) return;
+
+      filename = args.filename || 'export.csv';
+
+      if (!csv.match(/^data:text\/csv/i)) {
+        csv = 'data:text/csv;charset=utf-8,' + csv;
+      }
+      data = encodeURI(csv);
+
+      link = document.createElement('a');
+      link.setAttribute('href', data);
+      link.setAttribute('download', filename);
+      link.click();
+    }
+    try {
+      if (typeof Vue === 'object') {
+        console.log('Vue load');
+      }
+      Vue.filter('totNumber', function (value) {
+        return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      });
+    }catch (e)  {
+      console.log(e);
+    }
+    $(document).ready(function(){
+      $(document).foundation();
+
+      $("#csv-file").change(handleFileSelect);
+      $("#txt-file").change(handleTextSelect);
+      //var totfile = "https://puzzlethai.github.io/eSUB/dist/tot_usage2018.csv";
+      var totfile = "dist/tot_usage2018.csv";
+      //  copy papa ทำกับ awn เหมือนกัน โดยให้ อันล่าง เป็น tot  อ่านของ Awn ก่อน แต่ ไม่ต้อง เรียก chart และ month ด้วย
+      Papa.parse(totfile, {
+        download: true,
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+
+          //console.log("Complete : ",results);
+          //console.log("month : " ,results.data[0].month);
+          jsonAwn = results;
+          console.log("Complete : ",jsonAwn);
+          console.log("month : " ,jsonAwn.data[0].month);
+
+        }
+
+      });
+      console.log(calldate);
+      console.log(voice_sec);
+      console.log(sms);
+      console.log(data_vol);
+
+    });
+  </script>
+</head>
+<body>
+<div id="checkCSV">
+  <H3 > CHECK <span style = "color:blue"> TOT </span> USAGE </H3>
+  <input type="file" id="csv-file" name="files"/>
+  <input type="file" id="txt-file" name="files"/>
+  <table >
+    <tr>
+      <td ><div class=" secondary callout ">Traffic Type</div></td>
+      <td ><div class=" secondary callout ">EXCEL</div></td>
+      <td ><div class=" secondary callout ">JAVASCRIPT</div></td>
+      <td ><div class=" secondary callout ">DIFF</div></td>
+    </tr>
+    <tr>
+      <td ><div class=" primary callout ">Voice</div></td>
+      <td ><div class=" primary callout "><h6 class="text-right">{{voiceEXCEL}}</h6></div></td>
+      <td ><div class=" primary callout "><h6 class="text-right">{{voiceJS| totNumber}}</h6></div></td>
+      <td ><div class=" primary callout "><h6 class="text-right">{{voiceDIFF}}</h6></div></td>
+
+    </tr>
+    <tr>
+      <td ><div class=" success callout ">SMS</div></td>
+      <td ><div class=" success callout "><h6 class="text-right">{{smsEXCEL}}</h6></div></td>
+      <td ><div class=" success callout "><h6 class="text-right">{{smsJS| totNumber}}</h6></div></td>
+      <td ><div class=" success callout "><h6 class="text-right">{{smsDIFF}}</h6></div></td>
+
+    </tr>
+    <tr>
+      <td ><div class=" warning callout ">Data</div></td>
+      <td ><div class=" warning callout "><h6 class="text-right">{{dataEXCEL| totNumber}}</h6></div></td>
+      <td ><div class=" warning callout "><h6 class="text-right">{{dataJS| totNumber}}</h6></div></td>
+      <td ><div class=" warning callout "><h6 class="text-right">{{dataDIFF}}</h6></div></td>
+
+    </tr>
+  </table>
+</div>
+<a href='#'
+   onclick='downloadCSV({ filename: "awn_usage2018.csv" });'
+>Download CSV</a>
+<script>
+
+  var vm_checkCSV = new Vue({
+    el: '#checkCSV',
+    data: {
+      voiceEXCEL: 0,
+      voiceJS: 0,
+      voiceDIFF: 0,
+      smsEXCEL: 0,
+      smsJS: 0,
+      smsDIFF: 0,
+      dataEXCEL: 0,
+      dataJS: 0,
+      dataDIFF: 0
+    },
+
+  });
+
+
+
+
+</script>
+</body>
+</html>
+
