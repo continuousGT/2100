@@ -1037,8 +1037,8 @@
       vm_usage.eSUBtotAIS = vm_usage.eSUBtot;
       vm_usage.eSUBawnTOT = vm_usage.eSUBawn;
       vm_usage.eSUBawnSBN = vm_usage.eSUBawn;
-      //var csvfile = "https://puzzlethai.github.io/eSUB/dist/awn_usage2018.csv";
-      var csvfile = "dist/awn_usage2018.csv";   //
+      var csvfile = "https://puzzlethai.github.io/eSUB/dist/awn_usage2018.csv";
+      //var csvfile = "dist/awn_usage2018.csv";   //
       //  copy papa ทำกับ awn เหมือนกัน โดยให้ อันล่าง เป็น tot  อ่านของ Awn ก่อน แต่ ไม่ต้อง เรียก chart และ month ด้วย
       Papa.parse(csvfile, {
         download: true,
@@ -1117,8 +1117,8 @@
               : Math.abs(Number(labelValue));
 
       }
-      //csvfile = "https://puzzlethai.github.io/eSUB/dist/tot_usage2018.csv";
-      csvfile = "dist/tot_usage2018.csv"
+      csvfile = "https://puzzlethai.github.io/eSUB/dist/tot_usage2018.csv";
+      //csvfile = "dist/tot_usage2018.csv"
       Papa.parse(csvfile, {
         download: true,
         header: true,
