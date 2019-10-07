@@ -123,10 +123,10 @@
 
       for (i = 0; i < (totalindex); i++) {
 
-        tempTotal = tempTotal.add(bigInt(realdataTOT[i].data_volume));
+        tempTotal = tempTotal.add(bigInt(realdataTOT[i].data_volume.replace(' ', '').replace(/,/g, '').trim()));
       }
       console.log(tempTotal.toString());
-      let csvTotal = bigInt(realdataTOT[totalindex].data_volume);
+      let csvTotal = bigInt(realdataTOT[totalindex].data_volume.replace(' ', '').replace(/,/g, '').trim());
 
       console.log(csvTotal.toString());
 
@@ -268,7 +268,7 @@
             //firstRow = awn_worksheet['!merges'][0].e.r+1;
               console.log(" First Row is 3 ");
             console.log("First Row is",firstRow);
-            firstRow = 3;
+            firstRow = 4;   // for sep19
           } else {
             console.log("First Row : ",firstRow);
           }
@@ -344,6 +344,7 @@
                 console.log("First Row is NULL");
                 firstRowTOT = 2;
             }
+    /*
          columnsTOT = {
             file_date: 0,
             call_date: 1,
@@ -359,7 +360,19 @@
              data4G_volume: 11,
              data_record:12,
              data_volume:13};
-          firstRowTOT = 2;
+          firstRowTOT = 2;   before sep19 */
+            columnsTOT = {call_date: 0,
+                voice_record: 1,
+                voice_duration: 2,
+                sms_transaction: 3,
+                data_3G_record: 4,
+                data_3G_volume: 5,
+                data_4G_record: 6,
+                data_4G_volume: 7,
+                data_record: 8,
+                data_volume: 9
+            };
+            firstRowTOT = 4;
 
           /* END Find firstRow and define column of Table   */
           /* READ DATA  */
@@ -381,7 +394,7 @@
       }
 
     }
-    function formatDate(date) {
+   /* function formatDate(date) {
 
       let d = new Date(date),
         month = '' + (d.getMonth() + 1),
@@ -392,7 +405,12 @@
       if (day.length < 2) day = '0' + day;
 
       return [year, month, day].join('-');
+    } */
+    function formatDate(input_date) {
+        let d = moment(input_date, "DD/MM/YYYY");
+        return d.format('YYYY-MM-DD');
     }
+
 /*    function formatDateAWN(date) {
 
 
