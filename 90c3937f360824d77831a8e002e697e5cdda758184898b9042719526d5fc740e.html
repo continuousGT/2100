@@ -57,6 +57,7 @@
   <link rel="stylesheet" href="dist/billboard.min.css">
   <script src="dist/BigInteger.min.js"></script>
   <script src="dist/moment-with-locales.js"></script>
+  <script src="dist/xlsx.full.min.js"></script>
   <script language="JavaScript">
 
     //////////F12 disable code////////////////////////
@@ -348,8 +349,9 @@
         </table>
         <table style="width:100%">
           <tr>
-            <td> <div class=" callout "><h6 class="text-left">CROSS CHECK </h6></div></td>
+            <td> <div class=" callout "><button class="button" onclick="genreport()">ออกรายงาน</button></div></td>
             <td><div class=" callout "><span>&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; </span>
+              <span style="color: blue">DiFF = </span>
               <span style="color: green"> {{roamTotal|totNumber}}</span>
               <span> - </span>
               <span style="color: red"> {{nwCostAwn|totNumber}}</span>
@@ -651,6 +653,12 @@
   var chartEsub;
   var last6month =[];
   var first6month=[];
+
+  function genreport(){
+      var reportfile = "dist/SettleMentReport.xlsx";
+      var workbook = XLSX.readFile(reportfile);
+      console.log(workbook.SheetNames[0]);
+  }
 
   function voice2GB(voice) {
     return (voice*V2Data)/(60*1024);
