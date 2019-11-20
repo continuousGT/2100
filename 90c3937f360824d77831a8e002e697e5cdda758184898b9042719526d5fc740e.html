@@ -49,6 +49,17 @@
           padding: 20px;
         }*/
 
+    label {
+        cursor: pointer;
+        /* Style as you please, it will become the visible UI component. */
+    }
+
+    #xlf {
+        opacity: 0;
+        position: absolute;
+        z-index: -1;
+    }
+
   </style>
   <link rel="stylesheet" href="dist/app.css">
 
@@ -57,7 +68,9 @@
   <link rel="stylesheet" href="dist/billboard.min.css">
   <script src="dist/BigInteger.min.js"></script>
   <script src="dist/moment-with-locales.js"></script>
-  <script src="dist/xlsx.full.min.js"></script>
+
+  <script src="dist/xlsx.stlye.min.js"> </script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/file-saver@2.0.2/dist/FileSaver.min.js"></script>
   <script language="JavaScript">
 
     //////////F12 disable code////////////////////////
@@ -349,7 +362,7 @@
         </table>
         <table style="width:100%">
           <tr>
-            <td> <div class=" callout "><button class="button" onclick="genreport()">ออกรายงาน</button></div></td>
+            <td> <div class=" callout "><label for="xlf">ออกรายงาน</label><input type="file" name="xlfile" id="xlf" /></div></td>
             <td><div class=" callout "><span>&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; </span>
               <span style="color: blue">DiFF = </span>
               <span style="color: green"> {{roamTotal|totNumber}}</span>
@@ -360,7 +373,6 @@
             <td><div class=" callout "><h6 class="text-right">{{roamTotal - nwCostAwn|totNumber}}&nbsp; &nbsp; บาท</h6></div></td>
           </tr>
         </table>
-
       </div>
     </li>
 
@@ -615,8 +627,8 @@
 
 
 </div>
-<script>
 
+<script>
   const FRACT_DIGIT = 6;    // How many Fraction Digit do you want?
   const NO_DIGIT = 0;     // Check if still use
   const Million = 1000*1000;
@@ -653,12 +665,9 @@
   var chartEsub;
   var last6month =[];
   var first6month=[];
+  var reportMonth ="";
+  var tempDate;
 
-  function genreport(){
-      var reportfile = "https://continuousgt.github.io/2100/dist/SettleMentReport.xlsx";
-      var workbook = XLSX.readFile(reportfile);
-      console.log(workbook.SheetNames[0]);
-  }
 
   function voice2GB(voice) {
     return (voice*V2Data)/(60*1024);
@@ -782,6 +791,7 @@
     window.location.href = window.location.href;
 
   };
+
   try {
     if (window.jQuery)
     {
@@ -905,7 +915,14 @@
           this.eSUBtotAIS = this.eSUBtot;
           this.eSUBawnTOT = this.eSUBawn;
           this.eSUBawnSBN = this.eSUBawn;
-          var totUtil_latest = calUtil(tot_eSUB[tot_eSUB.length-1], "#totUtil_latest", TOT_MAX);
+
+          console.log(month[parseInt(newVal)]);
+            tempDate = moment(month[parseInt(newVal)]);
+            console.log(tempDate.month());
+            var thmonth = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน", "กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+            console.log(thmonth[tempDate.month()]+" "+(tempDate.year()+543));
+            reportMonth = thmonth[tempDate.month()]+" "+(tempDate.year()+543);
+            var totUtil_latest = calUtil(tot_eSUB[tot_eSUB.length-1], "#totUtil_latest", TOT_MAX);
           var awnUtil_latest = calUtil(awn_eSUB[awn_eSUB.length-1], "#awnUtil_latest", GUARENTEE);
           var totalUtil_latest = calUtil(awn_eSUB[awn_eSUB.length-1] + tot_eSUB[tot_eSUB.length-1], "#totalUtil_latest", GUARENTEE + TOT_MAX);
 
@@ -1409,8 +1426,144 @@
         }
       });
     } catch (err){ $('#modal').foundation('open');} // alert("Internet มีปัญหา โปรด กดปุ่ม reload")}
+/*      $("#xlf").change(function(){
+        alert(vm_usage.eSUBtotSBN )        ;
+    } );*/
+      $("#xlf").change(function(e) {
+
+          console.log('in handle file');
+          var files = e.target.files;
+          var i,f;
+          for (i = 0, f = files[i]; i != files.length; ++i) {
+              var reader = new FileReader();
+              var name = f.name;
+              reader.onload = function(e) {
+                  var data = e.target.result;
+//  ลอง เปลี่ยน raw = true แก้ สีดำ ได้ไหม
+                  var workbook = XLSX.read(data, {type: 'binary',cellDates:true,cellStyles:true,cellNF:true});
+                  console.log(workbook);
+                  var sum_sheetName = workbook.SheetNames[0];
+                  var summary_worksheet = workbook.Sheets[sum_sheetName];
+                  var rep_TOT_worksheet = workbook.Sheets[workbook.SheetNames[1]];
+                  var rep_AWN_worksheet = workbook.Sheets[workbook.SheetNames[2]];
+// TOT eSUB
+                  summary_worksheet["I5"].v = vm_usage.eSUBtotSBN;
+                  rep_TOT_worksheet["C5"].v = vm_usage.eSUBtotSBN;
+
+                  summary_worksheet["J5"].v = vm_usage.eSUBtotSBN*TYPE1_RATE;
+
+// AWN eSUB
+                  summary_worksheet["D5"].v = vm_usage.eSUBawnSBN;
+                  summary_worksheet["I7"].v = vm_usage.eSUBawnSBN;
+                  rep_TOT_worksheet["C7"].v = vm_usage.eSUBawnSBN;
+                  rep_AWN_worksheet["C5"].v = vm_usage.eSUBawnSBN;
+                  summary_worksheet["D7"].v = 10000000-vm_usage.eSUBawnSBN;
+                  rep_AWN_worksheet["C7"].v = 10000000-vm_usage.eSUBawnSBN;
+
+                  summary_worksheet["E5"].v = calRoamCost(vm_usage.eSUBawnSBN);
+                  summary_worksheet["E7"].v = calPensionCost(vm_usage.eSUBawnSBN);
+                  summary_worksheet["E11"].v = summary_worksheet["E5"].v+summary_worksheet["E7"].v;
+                  summary_worksheet["J7"].v = vm_usage.eSUBawnSBN*TYPE2_RATE;
+                  summary_worksheet["J11"].v = summary_worksheet["J5"].v+summary_worksheet["J7"].v;
+
+                  rep_TOT_worksheet["D5"].v = summary_worksheet["J5"].v;
+                  rep_TOT_worksheet["D7"].v = summary_worksheet["J7"].v;
+                  rep_TOT_worksheet["D9"].v = summary_worksheet["J11"].v;
+                  rep_AWN_worksheet["D5"].v = summary_worksheet["E5"].v;
+                  rep_AWN_worksheet["D7"].v = summary_worksheet["E7"].v;
+                  rep_AWN_worksheet["D11"].v = summary_worksheet["E11"].v;
+
+// report month
+                  summary_worksheet["B2"].v = "ประจำเดือน"+reportMonth;
+                  rep_TOT_worksheet["B2"].v = "ประจำเดือน"+reportMonth;
+                  rep_AWN_worksheet["B2"].V = "ประจำเดือน"+reportMonth;
+
+// correct black cell of summary_worksheet
+                  summary_worksheet["E5"].s = summary_worksheet["D5"].s;
+                  summary_worksheet["E6"].s = summary_worksheet["D6"].s;
+                  summary_worksheet["E7"].s = summary_worksheet["D7"].s;
+                  summary_worksheet["E8"].s = summary_worksheet["D8"].s;
+                  summary_worksheet["E9"].s = summary_worksheet["D9"].s;
+                  summary_worksheet["G5"].s = summary_worksheet["B5"].s;
+                  summary_worksheet["G6"].s = summary_worksheet["B6"].s;
+                  summary_worksheet["G7"].s = summary_worksheet["B7"].s;
+                  summary_worksheet["G8"].s = summary_worksheet["B8"].s;
+                  summary_worksheet["G9"].s = summary_worksheet["B9"].s;
+                  summary_worksheet["G10"].s = summary_worksheet["B10"].s;
+                  summary_worksheet["I5"].s = summary_worksheet["D5"].s;
+                  summary_worksheet["I6"].s = summary_worksheet["D6"].s;
+                  summary_worksheet["I7"].s = summary_worksheet["D7"].s;
+                  summary_worksheet["I8"].s = summary_worksheet["D8"].s;
+                  summary_worksheet["I9"].s = summary_worksheet["D9"].s;
+                  summary_worksheet["I10"].s = summary_worksheet["D10"].s;
+                  summary_worksheet["J5"].s = summary_worksheet["D5"].s;
+                  summary_worksheet["J6"].s = summary_worksheet["D6"].s;
+                  summary_worksheet["J7"].s = summary_worksheet["D7"].s;
+                  summary_worksheet["J8"].s = summary_worksheet["D8"].s;
+                  summary_worksheet["J9"].s = summary_worksheet["D9"].s;
+                  summary_worksheet["J10"].s = summary_worksheet["D10"].s;
+
+                  rep_TOT_worksheet["B5"].s = summary_worksheet["B5"].s;
+                  rep_TOT_worksheet["B6"].s = summary_worksheet["B6"].s;
+                  rep_TOT_worksheet["B7"].s = summary_worksheet["B7"].s;
+                  rep_TOT_worksheet["B8"].s = summary_worksheet["B8"].s;
+                  rep_TOT_worksheet["C5"].s = summary_worksheet["C5"].s;
+                  rep_TOT_worksheet["C7"].s = summary_worksheet["C7"].s;
+                  rep_TOT_worksheet["C8"].s = summary_worksheet["C8"].s;
+                  rep_TOT_worksheet["D5"].s = summary_worksheet["D5"].s;
+                  rep_TOT_worksheet["D6"].s = summary_worksheet["D6"].s;
+                  rep_TOT_worksheet["D7"].s = summary_worksheet["D7"].s;
+                  rep_TOT_worksheet["D8"].s = summary_worksheet["D8"].s;
+                  rep_TOT_worksheet["!ref"] = "B1:E21";
+
+                  rep_AWN_worksheet["C5"].s = summary_worksheet["C5"].s;
+                  rep_AWN_worksheet["D5"].s = summary_worksheet["D5"].s;
+                  rep_AWN_worksheet["B6"].s = summary_worksheet["B6"].s;
+                  rep_AWN_worksheet["C6"].s = summary_worksheet["C6"].s;
+                  rep_AWN_worksheet["D6"].s = summary_worksheet["D6"].s;
+                  rep_AWN_worksheet["C7"].s = summary_worksheet["C7"].s;
+                  rep_AWN_worksheet["D7"].s = summary_worksheet["D7"].s;
+                  rep_AWN_worksheet["B8"].s = summary_worksheet["B8"].s;
+                  rep_AWN_worksheet["C8"].s = summary_worksheet["C8"].s;
+                  rep_AWN_worksheet["D8"].s = summary_worksheet["D8"].s;
+                  rep_AWN_worksheet["D10"].s = rep_AWN_worksheet["C10"].s;
+                  rep_AWN_worksheet["B12"].s = summary_worksheet["B13"].s;
+                  rep_AWN_worksheet["C12"].s = summary_worksheet["B13"].s;
+                  rep_AWN_worksheet["D12"].s = summary_worksheet["B13"].s;
+                  rep_AWN_worksheet["!ref"] = "B1:D23";
+                  rep_AWN_worksheet["!cols"] = rep_TOT_worksheet["!cols"];
+// correct rown hieght
+                  var rowsH = [
+                      {hpx:27},{hpx:21},{hpx:21},{hpx:21},{hpx:51},
+                      {hpx:21},{hpx:21},{hpx:21},{hpx:21},{hpx:21},{hpx:21},{hpx:21},{hpx:21},
+                      {hpx:21},{hpx:21},{hpx:21},{hpx:21},{hpx:21},{hpx:21},{hpx:21},{hpx:21},
+                      {hpx:21},{hpx:21}
+                  ];
 
 
+                  summary_worksheet['!rows']=rowsH;
+// Save  workbook
+                  /* bookType can be 'xlsx' or 'xlsm' or 'xlsb' */
+                  var wopts = { bookType:'xlsx', bookSST:false, type:'binary' };
+
+                  var wbout = XLSX.write(workbook,wopts);
+
+                  function s2ab(s) {
+                      var buf = new ArrayBuffer(s.length);
+                      var view = new Uint8Array(buf);
+                      for (var i=0; i!=s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
+                      return buf;
+                  }
+                  var fileName = "Rep_"+(tempDate.month()+1)+"_"+(tempDate.year()+543)+".xlsx";
+                  /* the saveAs call downloads a file on the local machine */
+                  saveAs(new Blob([s2ab(wbout)],{type:""}), fileName);
+
+
+
+              };
+              reader.readAsBinaryString(f);
+          }
+      });
     $('input[type=radio][name=chartTYPE]').change(function() {
       if (this.value == 'bar') {
         chartEsub.transform('bar');
@@ -1421,6 +1574,6 @@
     });
   };
 
+
 </script>
 </body>
-
