@@ -122,7 +122,7 @@
       let tempTotal = bigInt();
 
       for (i = 0; i < (totalindex); i++) {
-
+// ถ้าเจอ error บรรทัดนี้ เกิด จาก  มี row ใด row หนึ่งใน column data_volume ไม่ได้ ตั้งเป็น number store as text
         tempTotal = tempTotal.add(bigInt(realdataTOT[i].data_volume.replace(' ', '').replace(/,/g, '').trim()));
       }
       console.log(tempTotal.toString());
@@ -361,7 +361,8 @@
              data_record:12,
              data_volume:13};
           firstRowTOT = 2;   before sep19 */
-            columnsTOT = {call_date: 0,
+
+          /*  columnsTOT = {call_date: 0,
                 voice_record: 1,
                 voice_duration: 2,
                 sms_transaction: 3,
@@ -371,6 +372,21 @@
                 data_4G_volume: 7,
                 data_record: 8,
                 data_volume: 9
+            }; only oct19 */
+
+            columnsTOT = {call_date: 0,
+                voice_record: 1,
+                voice_duration: 2,
+                mt_record: 3,
+                mt_duration: 4,
+                sms_transaction: 5,
+                sms_MT: 6,
+                data_3G_record: 7,
+                data_3G_volume: 8,
+                data_4G_record: 9,
+                data_4G_volume: 10,
+                data_record: 11,
+                data_volume: 12
             };
             firstRowTOT = 4;
 
