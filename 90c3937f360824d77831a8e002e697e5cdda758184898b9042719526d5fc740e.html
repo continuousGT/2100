@@ -1446,16 +1446,30 @@
                   var summary_worksheet = workbook.Sheets[sum_sheetName];
                   var rep_TOT_worksheet = workbook.Sheets[workbook.SheetNames[1]];
                   var rep_AWN_worksheet = workbook.Sheets[workbook.SheetNames[4]];
-                  console.log(workbook.Sheets[workbook.SheetNames[2]]);
-                  console.log(workbook.Sheets[workbook.SheetNames[3]]);
-                  console.log(workbook.Sheets[workbook.SheetNames[5]]);
-                  console.log(workbook.Sheets[workbook.SheetNames[6]]);
-                  console.log(workbook.Sheets[workbook.SheetNames[7]]);
+                  var TOT_2_worksheet = workbook.Sheets[workbook.SheetNames[2]];
+                  var TOT_3_worksheet = workbook.Sheets[workbook.SheetNames[3]];
+                  var AWN_2_worksheet = workbook.Sheets[workbook.SheetNames[5]];
+                  var AWN_2_20_worksheet = workbook.Sheets[workbook.SheetNames[6]];
+                  var AWN_2_80_worksheet = workbook.Sheets[workbook.SheetNames[7]];
+
+                  console.log(workbook.SheetNames[2]);
+                  console.log(workbook.SheetNames[3]);
+                  console.log(workbook.SheetNames[5]);
+                  console.log(workbook.SheetNames[6]);
+                  console.log(workbook.SheetNames[7]);
 // TOT eSUB
                   summary_worksheet["I5"].v = vm_usage.eSUBtotSBN;
                   rep_TOT_worksheet["C5"].v = vm_usage.eSUBtotSBN;
 
                   summary_worksheet["J5"].v = vm_usage.eSUBtotSBN*TYPE1_RATE;
+
+// TOT GB         จริงๆ เป็นข้อมูล tot sub แต่ เอา ไป ฝาก print ไว้ที่ sheet TOT3 ที่เป็น detail ของ AWN  !!!!!
+                  TOT_3_worksheet["D46"].v = vm_usage.totVoiceGB;
+                  TOT_3_worksheet["D47"].v = vm_usage.totSmsGB;
+                  TOT_3_worksheet["D48"].v = vm_usage.totDataGB;
+                  TOT_3_worksheet["D49"].v = vm_usage.totAllGB;
+                  TOT_3_worksheet["D50"].v = TOT_3_worksheet["D49"].v/Million;
+                  TOT_3_worksheet["D49"].v = vm_usage.totGBperSUB;
 
 // AWN eSUB
                   summary_worksheet["D5"].v = vm_usage.eSUBawnSBN;
@@ -1544,9 +1558,30 @@
                       {hpx:21},{hpx:21},{hpx:21},{hpx:21},{hpx:21},{hpx:21},{hpx:21},{hpx:21},
                       {hpx:21},{hpx:21}
                   ];
-
-
                   summary_worksheet['!rows']=rowsH;
+                  // correct black cell of TOT_3_worksheet
+                  TOT_3_worksheet["B46"].s = TOT_3_worksheet["E46"].s;
+                  TOT_3_worksheet["B47"].s = TOT_3_worksheet["E47"].s;
+                  TOT_3_worksheet["D47"].s = TOT_3_worksheet["E47"].s;
+                  TOT_3_worksheet["B48"].s = TOT_3_worksheet["E48"].s;
+                  TOT_3_worksheet["D48"].s = TOT_3_worksheet["E48"].s;
+                  TOT_3_worksheet["D49"].s = TOT_3_worksheet["E49"].s;
+                  TOT_3_worksheet["D50"].s = TOT_3_worksheet["E50"].s;
+                  TOT_3_worksheet["D51"].s = TOT_3_worksheet["E51"].s;
+
+                  TOT_3_worksheet["B56"].s = AWN_2_20_worksheet["B61"].s;
+                  TOT_3_worksheet["C56"].s = AWN_2_20_worksheet["B61"].s;
+
+                  TOT_3_worksheet["B66"].s = rep_TOT_worksheet["B5"].s;
+                  TOT_3_worksheet["B67"].s = rep_TOT_worksheet["B6"].s;
+                  TOT_3_worksheet["C67"].s = TOT_3_worksheet["B67"].s;
+                  TOT_3_worksheet["B68"].s = rep_TOT_worksheet["B7"].s;
+                  TOT_3_worksheet["B69"].s = rep_TOT_worksheet["B8"].s;
+                  TOT_3_worksheet["D66"].s = rep_TOT_worksheet["D5"].s;
+                  TOT_3_worksheet["D67"].s = TOT_3_worksheet["B67"].s;
+                  TOT_3_worksheet["D68"].s = TOT_3_worksheet["D66"].s;
+                  TOT_3_worksheet["D69"].s = rep_TOT_worksheet["D8"].s;
+
 // Save  workbook
                   /* bookType can be 'xlsx' or 'xlsm' or 'xlsb' */
                   var wopts = { bookType:'xlsx', bookSST:false, type:'binary' };
