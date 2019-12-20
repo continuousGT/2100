@@ -3,6 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <title>Title</title>
+  <style>
+    label {
+      cursor: pointer;
+      /* Style as you please, it will become the visible UI component. */
+    }
+
+    #xlf {
+      opacity: 0;
+      position: absolute;
+      z-index: -1;
+    }
+  </style>
   <script src="dist/papaparse.js"></script>
   <script src="dist/jquery-1.8.3.min.js"></script>
   <script src="dist/foundation.min.js"></script>
@@ -12,7 +24,9 @@
   <!--<script src="http://peterolson.github.com/BigInteger.js/BigInteger.min.js"></script>-->
   <script src="dist/BigInteger.min.js"></script>
   <link rel="stylesheet" href="dist/foundation.min.css">
-  <script src="dist/xlsx.full.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/file-saver@2.0.2/dist/FileSaver.min.js"></script>
+  <!--<script src="dist/xlsx.full.min.js"></script>-->
+  <script src="dist/xlsx.stlye.min.js"> </script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.10/lodash.js"></script>
   <script src="dist/moment-with-locales.js"></script>
   <script>
@@ -499,6 +513,188 @@
       link.setAttribute('download', filename);
       link.click();
     }
+    function handleFile(e) {
+
+        console.log('in handle file');
+        var files = e.target.files;
+        var i,f;
+        for (i = 0, f = files[i]; i != files.length; ++i) {
+            var reader = new FileReader();
+            var name = f.name;
+            reader.onload = function(e) {
+                var data = e.target.result;
+//  ลอง เปลี่ยน raw = true แก้ สีดำ ได้ไหม
+                var workbook = XLSX.read(data, {type: 'binary',cellDates:true,cellStyles:true,cellNF:true});
+                console.log(workbook);
+                var sum_sheetName = workbook.SheetNames[0];
+                var summary_worksheet = workbook.Sheets[sum_sheetName];
+                var rep_TOT_worksheet = workbook.Sheets[workbook.SheetNames[1]];
+                var rep_AWN_worksheet = workbook.Sheets[workbook.SheetNames[4]];
+                var TOT_2_worksheet = workbook.Sheets[workbook.SheetNames[2]];
+                var TOT_3_worksheet = workbook.Sheets[workbook.SheetNames[3]];
+                var AWN_2_worksheet = workbook.Sheets[workbook.SheetNames[5]];
+                var AWN_2_20_worksheet = workbook.Sheets[workbook.SheetNames[6]];
+                var AWN_3_80_worksheet = workbook.Sheets[workbook.SheetNames[7]];
+
+// ใส่ค่า tot cdr detail ลงใน template TOT2 และ AWN_2_20
+                const startRow = 7;
+                const totalRowTOT=42;
+                const callDateCol = 'B'; // column ของ template รายงาน ไม่ใช่ column ของ excelจาก AWN นะ
+                const vRecordCol = 'C', vDuraCol = 'D', smsTransCol = 'E', dataRecCol ='F',dataVolCol ='G';
+
+                for (j=0; j < (realdataTOT.length-1); ++j){
+                  TOT_2_worksheet[callDateCol + (startRow+j).toString()].v = realdataTOT[j].call_date ;
+                    AWN_2_20_worksheet[callDateCol + (startRow+j).toString()].v = realdataTOT[j].call_date;
+                  TOT_2_worksheet[vRecordCol + (startRow+j).toString()].v = realdataTOT[j].voice_record;
+                    AWN_2_20_worksheet[vRecordCol + (startRow+j).toString()].v = realdataTOT[j].voice_record;
+                  TOT_2_worksheet[vDuraCol + (startRow+j).toString()].v = realdataTOT[j].voice_duration;
+                    AWN_2_20_worksheet[vDuraCol + (startRow+j).toString()].v = realdataTOT[j].voice_duration;
+                  TOT_2_worksheet[smsTransCol + (startRow+j).toString()].v = realdataTOT[j].sms_transaction;
+                    AWN_2_20_worksheet[smsTransCol + (startRow+j).toString()].v = realdataTOT[j].sms_transaction;
+                  TOT_2_worksheet[dataRecCol + (startRow+j).toString()].v = realdataTOT[j].data_record;
+                    AWN_2_20_worksheet[dataRecCol + (startRow+j).toString()].v = realdataTOT[j].data_record;
+                  TOT_2_worksheet[dataVolCol + (startRow+j).toString()].v = realdataTOT[j].data_volume;
+                    AWN_2_20_worksheet[dataVolCol + (startRow+j).toString()].v = realdataTOT[j].data_volume;
+                }
+ //  ใส่ค่า TOT total ลงใน template TOT_2 AWN_2_20
+                TOT_2_worksheet[vRecordCol + (totalRowTOT).toString()].v = realdataTOT[realdataTOT.length-1].voice_record;
+                AWN_2_20_worksheet[vRecordCol + (totalRowTOT).toString()].v = realdataTOT[realdataTOT.length-1].voice_record;
+                TOT_2_worksheet[vDuraCol + (totalRowTOT).toString()].v = realdataTOT[realdataTOT.length-1].voice_duration;
+                AWN_2_20_worksheet[vDuraCol + (totalRowTOT).toString()].v = realdataTOT[realdataTOT.length-1].voice_duration;
+                TOT_2_worksheet[smsTransCol + (totalRowTOT).toString()].v = realdataTOT[realdataTOT.length-1].sms_transaction;
+                AWN_2_20_worksheet[smsTransCol + (totalRowTOT).toString()].v = realdataTOT[realdataTOT.length-1].sms_transaction;
+                TOT_2_worksheet[dataRecCol + (totalRowTOT).toString()].v = realdataTOT[realdataTOT.length-1].data_record;
+                AWN_2_20_worksheet[dataRecCol + (totalRowTOT).toString()].v = realdataTOT[realdataTOT.length-1].data_record;
+                TOT_2_worksheet[dataVolCol + (totalRowTOT).toString()].v = realdataTOT[realdataTOT.length-1].data_volume;
+                AWN_2_20_worksheet[dataVolCol + (totalRowTOT).toString()].v = realdataTOT[realdataTOT.length-1].data_volume;
+
+// ใส่ค่า AWN cdr detail ลงใน template TOT_3 AWN_2 และ AWN_3_80
+
+                const totalRow = 42;
+
+                for (j=0; j < (realdata.length-1); ++j){
+                    TOT_3_worksheet[callDateCol + (startRow+j).toString()].v = realdata[j].call_date;
+                    AWN_2_worksheet[callDateCol + (startRow+j).toString()].v = realdata[j].call_date;
+                    AWN_3_80_worksheet[callDateCol + (startRow+j).toString()].v = realdata[j].call_date;
+                    TOT_3_worksheet[vRecordCol + (startRow+j).toString()].v = realdata[j].voice_record;
+                    AWN_2_worksheet[vRecordCol + (startRow+j).toString()].v = realdata[j].voice_record;
+                    AWN_3_80_worksheet[vRecordCol + (startRow+j).toString()].v = realdata[j].voice_record;
+                    TOT_3_worksheet[vDuraCol + (startRow+j).toString()].v = realdata[j].voice_duration;
+                    AWN_2_worksheet[vDuraCol + (startRow+j).toString()].v = realdata[j].voice_duration;
+                    AWN_3_80_worksheet[vDuraCol + (startRow+j).toString()].v = realdata[j].voice_duration;
+                    TOT_3_worksheet[smsTransCol + (startRow+j).toString()].v = realdata[j].sms_transaction;
+                    AWN_2_worksheet[smsTransCol + (startRow+j).toString()].v = realdata[j].sms_transaction;
+                    AWN_3_80_worksheet[smsTransCol + (startRow+j).toString()].v = realdata[j].sms_transaction;
+                    TOT_3_worksheet[dataRecCol + (startRow+j).toString()].v = realdata[j].data_record;
+                    AWN_2_worksheet[dataRecCol + (startRow+j).toString()].v = realdata[j].data_record;
+                    AWN_3_80_worksheet[dataRecCol + (startRow+j).toString()].v = realdata[j].data_record;
+                    TOT_3_worksheet[dataVolCol + (startRow+j).toString()].v = realdata[j].data_volume;
+                    AWN_2_worksheet[dataVolCol + (startRow+j).toString()].v = realdata[j].data_volume;
+                    AWN_3_80_worksheet[dataVolCol + (startRow+j).toString()].v = realdata[j].data_volume;
+                }
+                //  ใส่ค่า AWN total ลงใน template
+                TOT_3_worksheet[vRecordCol + (totalRow).toString()].v = realdata[realdata.length-1].voice_record;
+                AWN_2_worksheet[vRecordCol + (totalRow).toString()].v = realdata[realdata.length-1].voice_record;
+                AWN_3_80_worksheet[vRecordCol + (totalRow).toString()].v = realdata[realdata.length-1].voice_record;
+                TOT_3_worksheet[vDuraCol + (totalRow).toString()].v = realdata[realdata.length-1].voice_duration;
+                AWN_2_worksheet[vDuraCol + (totalRow).toString()].v = realdata[realdata.length-1].voice_duration;
+                AWN_3_80_worksheet[vDuraCol + (totalRow).toString()].v = realdata[realdata.length-1].voice_duration;
+                TOT_3_worksheet[smsTransCol + (totalRow).toString()].v = realdata[realdata.length-1].sms_transaction;
+                AWN_2_worksheet[smsTransCol + (totalRow).toString()].v = realdata[realdata.length-1].sms_transaction;
+                AWN_3_80_worksheet[smsTransCol + (totalRow).toString()].v = realdata[realdata.length-1].sms_transaction;
+                TOT_3_worksheet[dataRecCol + (totalRow).toString()].v = realdata[realdata.length-1].data_record;
+                AWN_2_worksheet[dataRecCol + (totalRow).toString()].v = realdata[realdata.length-1].data_record;
+                AWN_3_80_worksheet[dataRecCol + (totalRow).toString()].v = realdata[realdata.length-1].data_record;
+                TOT_3_worksheet[dataVolCol + (totalRow).toString()].v = realdata[realdata.length-1].data_volume;
+                AWN_2_worksheet[dataVolCol + (totalRow).toString()].v = realdata[realdata.length-1].data_volume;
+                AWN_3_80_worksheet[dataVolCol + (totalRow).toString()].v = realdata[realdata.length-1].data_volume;
+
+// correct black cell of summary_worksheet
+                summary_worksheet["E5"].s = summary_worksheet["D5"].s;
+                summary_worksheet["E6"].s = summary_worksheet["D6"].s;
+                summary_worksheet["E7"].s = summary_worksheet["D7"].s;
+                summary_worksheet["E8"].s = summary_worksheet["D8"].s;
+                summary_worksheet["E9"].s = summary_worksheet["D9"].s;
+                summary_worksheet["G5"].s = summary_worksheet["B5"].s;
+                summary_worksheet["G6"].s = summary_worksheet["B6"].s;
+                summary_worksheet["G7"].s = summary_worksheet["B7"].s;
+                summary_worksheet["G8"].s = summary_worksheet["B8"].s;
+                summary_worksheet["G9"].s = summary_worksheet["B9"].s;
+                summary_worksheet["G10"].s = summary_worksheet["B10"].s;
+                summary_worksheet["I5"].s = summary_worksheet["D5"].s;
+                summary_worksheet["I6"].s = summary_worksheet["D6"].s;
+                summary_worksheet["I7"].s = summary_worksheet["D7"].s;
+                summary_worksheet["I8"].s = summary_worksheet["D8"].s;
+                summary_worksheet["I9"].s = summary_worksheet["D9"].s;
+                summary_worksheet["I10"].s = summary_worksheet["D10"].s;
+                summary_worksheet["J5"].s = summary_worksheet["D5"].s;
+                summary_worksheet["J6"].s = summary_worksheet["D6"].s;
+                summary_worksheet["J7"].s = summary_worksheet["D7"].s;
+                summary_worksheet["J8"].s = summary_worksheet["D8"].s;
+                summary_worksheet["J9"].s = summary_worksheet["D9"].s;
+                summary_worksheet["J10"].s = summary_worksheet["D10"].s;
+
+                rep_TOT_worksheet["B5"].s = summary_worksheet["B5"].s;
+                rep_TOT_worksheet["B6"].s = summary_worksheet["B6"].s;
+                rep_TOT_worksheet["B7"].s = summary_worksheet["B7"].s;
+                rep_TOT_worksheet["B8"].s = summary_worksheet["B8"].s;
+                rep_TOT_worksheet["C5"].s = summary_worksheet["C5"].s;
+                rep_TOT_worksheet["C7"].s = summary_worksheet["C7"].s;
+                rep_TOT_worksheet["C8"].s = summary_worksheet["C8"].s;
+                rep_TOT_worksheet["D5"].s = summary_worksheet["D5"].s;
+                rep_TOT_worksheet["D6"].s = summary_worksheet["D6"].s;
+                rep_TOT_worksheet["D7"].s = summary_worksheet["D7"].s;
+                rep_TOT_worksheet["D8"].s = summary_worksheet["D8"].s;
+                rep_TOT_worksheet["!ref"] = "B1:E21";
+
+                rep_AWN_worksheet["C5"].s = summary_worksheet["C5"].s;
+                rep_AWN_worksheet["D5"].s = summary_worksheet["D5"].s;
+                rep_AWN_worksheet["B6"].s = summary_worksheet["B6"].s;
+                rep_AWN_worksheet["C6"].s = summary_worksheet["C6"].s;
+                rep_AWN_worksheet["D6"].s = summary_worksheet["D6"].s;
+                rep_AWN_worksheet["C7"].s = summary_worksheet["C7"].s;
+                rep_AWN_worksheet["D7"].s = summary_worksheet["D7"].s
+                rep_AWN_worksheet["B8"].s = summary_worksheet["B8"].s;
+                rep_AWN_worksheet["C8"].s = summary_worksheet["C8"].s;
+                rep_AWN_worksheet["D8"].s = summary_worksheet["D8"].s;
+                rep_AWN_worksheet["D10"].s = rep_AWN_worksheet["C10"].s;
+                rep_AWN_worksheet["B12"].s = summary_worksheet["B13"].s;
+                rep_AWN_worksheet["C12"].s = summary_worksheet["B13"].s;
+                rep_AWN_worksheet["D12"].s = summary_worksheet["B13"].s;
+                rep_AWN_worksheet["!ref"] = "B1:D23";
+                rep_AWN_worksheet["!cols"] = rep_TOT_worksheet["!cols"];
+// correct rown hieght
+                var rowsH = [
+                    {hpx:27},{hpx:21},{hpx:21},{hpx:21},{hpx:51},
+                    {hpx:21},{hpx:21},{hpx:21},{hpx:21},{hpx:21},{hpx:21},{hpx:21},{hpx:21},
+                    {hpx:21},{hpx:21},{hpx:21},{hpx:21},{hpx:21},{hpx:21},{hpx:21},{hpx:21},
+                    {hpx:21},{hpx:21}
+                ];
+
+
+                summary_worksheet['!rows']=rowsH;
+// Save  workbook
+                /* bookType can be 'xlsx' or 'xlsm' or 'xlsb' */
+                var wopts = { bookType:'xlsx', bookSST:false, type:'binary' };
+
+                var wbout = XLSX.write(workbook,wopts);
+
+                function s2ab(s) {
+                    var buf = new ArrayBuffer(s.length);
+                    var view = new Uint8Array(buf);
+                    for (var i=0; i!=s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
+                    return buf;
+                }
+
+                /* the saveAs call downloads a file on the local machine */
+                saveAs(new Blob([s2ab(wbout)],{type:""}), "test.xlsx")
+
+
+
+            };
+            reader.readAsBinaryString(f);
+        }
+    }
     try {
       if (typeof Vue === 'object') {
         console.log('Vue load');
@@ -511,7 +707,8 @@
     }
     $(document).ready(function(){
       $(document).foundation();
-
+        var xlf = document.getElementById('xlf');
+        xlf.addEventListener('change', handleFile, false);
       $("#txt-file").change(handleTextSelect);
       //var awnfile = "https://puzzlethai.github.io/eSUB/dist/awn_usage2018.csv";
       let awnfile = "dist/awn_usage2018.csv";
@@ -630,8 +827,12 @@
 
     </tr>
   </table>
+  <label for="xlf">ออกรายงาน</label>
+  <input type="file" name="xlfile" id="xlf" />
 </div>
 <script>
+
+
 
   var vm_checkCSV = new Vue({
     el: '#checkCSV',
