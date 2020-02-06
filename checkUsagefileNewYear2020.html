@@ -327,17 +327,17 @@
 
 
 
-          let { columnsTOT, firstRowTOT } = findTable(tot_worksheet, rangeTOT, {
-/*            file_date: "FILE_DATE",
-            call_date: "CALL_DATE",
-              voice_record: "TOTAL MOC - RECORD",
-              voice_duration: "TOTAL MOC - DURATION(SEC.)",
-            local_record: "MTC - RECORD",
-            local_duration: "MTC - DURATION(SEC.)",
-            sms_transaction: "SMS MO - TRANSACTION",
-            sms_mt_trans: "SMS MT - TRANSACTION",
-            data_record: "DATA 3G - RECORD",
-            data_volume: "DATA 3G - VOLUME(BYTE)"*/
+            /*          let { columnsTOT, firstRowTOT } = findTable(tot_worksheet, rangeTOT, {
+                        file_date: "FILE_DATE",
+                        call_date: "CALL_DATE",
+                          voice_record: "TOTAL MOC - RECORD",
+                          voice_duration: "TOTAL MOC - DURATION(SEC.)",
+                        local_record: "MTC - RECORD",
+                        local_duration: "MTC - DURATION(SEC.)",
+                        sms_transaction: "SMS MO - TRANSACTION",
+                        sms_mt_trans: "SMS MT - TRANSACTION",
+                        data_record: "DATA 3G - RECORD",
+                        data_volume: "DATA 3G - VOLUME(BYTE)"
               file_date: 0,
               call_date: 1,
               voice_record: 2,
@@ -358,6 +358,7 @@
                 console.log("First Row is NULL");
                 firstRowTOT = 2;
             }
+            */
     /*
          columnsTOT = {
             file_date: 0,
@@ -388,7 +389,7 @@
                 data_volume: 9
             }; only oct19 */
 
-/*            columnsTOT = {call_date: 0,   // before NOV2019
+            columnsTOT = {call_date: 0,   // before NOV2019 and JAN2020
                 voice_record: 1,
                 voice_duration: 2,
                 mt_record: 3,
@@ -402,8 +403,8 @@
                 data_record: 11,
                 data_volume: 12
             };
-            firstRowTOT = 4;*/
-            columnsTOT = {call_date: 0,   // First Use DEC 2019
+            firstRowTOT = 4;
+   /*         columnsTOT = {call_date: 0,   // First Use DEC 2019
                 v_local_R: 1,
                 v_local_D: 2,
                 v_idd_r:3,
@@ -423,7 +424,8 @@
                 data_record: 17,
                 data_volume: 18
             };
-            firstRowTOT = 4;
+            firstRowTOT = 4; // use for DEC */
+
           /* END Find firstRow and define column of Table   */
           /* READ DATA  */
           const totdata = readTable(tot_worksheet, rangeTOT, columnsTOT, firstRowTOT, (row) => false);
