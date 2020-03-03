@@ -291,7 +291,7 @@
           const awndata = readTable(awn_worksheet, rangeAWN, columns, firstRow, (row) => false);
           console.log(awndata);
           realdata = awndata.filter((member) => {
-            return member.data_record !== null
+            return member.data_record !== ""
           });
           console.log(realdata[realdata.length-1]);
           usage_date = formatDateAWN(realdata[10].call_date);
@@ -431,7 +431,7 @@
           const totdata = readTable(tot_worksheet, rangeTOT, columnsTOT, firstRowTOT, (row) => false);
           console.log(totdata);
           realdataTOT = totdata.filter((member) => {
-            return member.data_record !== null
+            return member.data_record !== ""
           });
           console.log(realdataTOT[realdataTOT.length-1]);
           usage_dateTOT = formatDate(realdataTOT[10].call_date);
