@@ -290,8 +290,11 @@
           /* READ DATA  */
           const awndata = readTable(awn_worksheet, rangeAWN, columns, firstRow, (row) => false);
           console.log(awndata);
+          var tempEAK = awndata.filter((member) => {
+              return member.data_record !== ""
+          });
           realdata = awndata.filter((member) => {
-            return member.data_record !== ""
+              return member.data_record !== null
           });
           console.log(realdata[realdata.length-1]);
           usage_date = formatDateAWN(realdata[10].call_date);
@@ -430,9 +433,14 @@
           /* READ DATA  */
           const totdata = readTable(tot_worksheet, rangeTOT, columnsTOT, firstRowTOT, (row) => false);
           console.log(totdata);
-          realdataTOT = totdata.filter((member) => {
-            return member.data_record !== ""
+          var tempOzone  = totdata.filter((member) => {
+                return member.data_record !== ""
+            });
+
+          realdataTOT = tempOzone.filter((member) => {
+            return member.data_record !== null
           });
+
           console.log(realdataTOT[realdataTOT.length-1]);
           usage_dateTOT = formatDate(realdataTOT[10].call_date);
           console.log("Date is ",usage_dateTOT);
