@@ -670,10 +670,10 @@
 
 
   function voice2GB(voice) {
-    return (voice*V2Data)/(60*1024);
+    return parseFloat(((voice*V2Data)/(60*1024)).toFixed(6));
   }
   function sms2GB(sms) {
-    return (sms*V2Data)/1024;
+    return parseFloat(((sms*V2Data)/1024).toFixed(6));
   }
   function data2GB(databyte) {
     let largeNum = bigInt(parseFloatIgnoreCommas(databyte));
