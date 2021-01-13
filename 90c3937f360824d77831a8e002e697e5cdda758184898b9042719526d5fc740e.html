@@ -1502,19 +1502,21 @@
                   AWN_2_80_worksheet["D56"].v = vm_usage.awnGBperSUB;
 
 // AWN eSUB
-                  summary_worksheet["D5"].v = vm_usage.eSUBawnSBN;
-                  summary_worksheet["I7"].v = vm_usage.eSUBawnSBN;
-                  rep_TOT_worksheet["C7"].v = vm_usage.eSUBawnSBN;
-                  rep_AWN_worksheet["C5"].v = vm_usage.eSUBawnSBN;
+
+                  summary_worksheet["I7"].v = vm_usage.eSUBawnSBN;  // total AWN eSUB
+                  rep_TOT_worksheet["C7"].v = vm_usage.eSUBawnSBN;  // total AWN eSUB
+
                   TOT_3_worksheet["D66"].v = vm_usage.eSUBawnSBN;
-                  AWN_2_worksheet["D65"].v = vm_usage.eSUBawnSBN;
+
                   AWN_2_80_worksheet["D64"].v = vm_usage.eSUBawnSBN;
 
                   if (vm_usage.eSUBawnSBN < 10000000) {
+                      summary_worksheet["D5"].v = vm_usage.eSUBawnSBN;
                       summary_worksheet["D7"].v = 10000000-vm_usage.eSUBawnSBN;
                       rep_AWN_worksheet["C7"].v = 10000000-vm_usage.eSUBawnSBN;
                       AWN_2_worksheet["D66"].v = 10000000-vm_usage.eSUBawnSBN;
                   } else {
+                      summary_worksheet["D5"].v = 10000000;
                       summary_worksheet["D7"].v = 0;
                       rep_AWN_worksheet["C7"].v = 0;
                       AWN_2_worksheet["D66"].v = 0;
@@ -1522,7 +1524,8 @@
                       rep_AWN_worksheet["C9"].v = vm_usage.eSUBawnSBN-10000000;
                       AWN_2_worksheet["D67"].v = vm_usage.eSUBawnSBN-10000000;
                   }
-
+                  rep_AWN_worksheet["C5"].v = summary_worksheet["D5"].v;
+                  AWN_2_worksheet["D65"].v = summary_worksheet["D5"].v;
 
                   summary_worksheet["E5"].v = calRoamCost(vm_usage.eSUBawnSBN);
                   summary_worksheet["E7"].v = calPensionCost(vm_usage.eSUBawnSBN);
