@@ -6,16 +6,17 @@
     <meta charset="windows-1252">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="dist/foundation.min.js"></script>
-    <style>
+    <link rel="stylesheet" href="dist/foundation.min.css">
+<!--    <style>
         table, th, td {
             border: 1px solid black;
             border-collapse: collapse;
         }
-    </style>
+    </style>-->
 </head>
 <body>
 
-<table id="table"  >
+<table id="table" class="table-scroll" >
 
     <!-- The Row Number 0 -->
     <tr>
@@ -29,102 +30,79 @@
         <!--<th>Age</th>-->
     </tr>
     <!-- End Row Number 0 -->
-    <!--
-    <tr>
-        <td></td>
-        <td></td>
-        <td></td>
-    </tr>
 
-    <tr>
-        <td></td>
-        <td></td>
-        <td></td>
-    </tr>
-
-    <tr>
-        <td></td>
-        <td></td>
-        <td></td>
-    </tr>
-
-    <tr>
-        <td></td>
-        <td></td>
-        <td></td>
-    </tr>
-
-    <tr>
-        <td></td>
-        <td></td>
-        <td></td>
-    </tr>
-    -->
 </table>
+
+
+<button onclick="exportToExcel('table', 'user-data')" type="button" class="button social twitter">
+    <i class="fa fa-twitter" aria-hidden="true"></i> Download
+</button>
+
 
 <script>
 
-/*    var array = [["A1","B1","C1"],
-            ["A2","B2","C2"],
-            ["A3","B3","C3"],
-            ["A4","B4","C4"],
-            ["A5","B5","C5"],
-            ["A1","B1","C1"],
-            ["A2","B2","C2"],
-            ["A3","B3","C3"],
-            ["A4","B4","C4"],
-            ["A5","B5","C5"]],*/
-    var array = [["A1","B1"],
-        ["A2","B2"],
-        ["A3","B3"],
-        ["A4","B4"],
-        ["A5","B5"],
-        ["A1","B1"],
-        ["A2","B2"],
-        ["A3","B3"],
-        ["A4","B4"],
-        ["A5","B5"]],
+    var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+    function dateFormat(d){
+        var t = new Date(d);
+        return monthNames[t.getMonth()]+'-'+t.getFullYear();
+    }
+
+        function exportToExcel(tableID, filename = ''){
+            var downloadurl;
+            var dataFileType = 'application/vnd.ms-excel';
+            var tableSelect = document.getElementById(tableID);
+            var tableHTMLData = tableSelect.outerHTML.replace(/ /g, '%20');
+
+            // Specify file name
+            filename = filename?filename+'.xls':'export_excel_data.xls';
+
+            // Create download link element
+            downloadurl = document.createElement("a");
+
+            document.body.appendChild(downloadurl);
+
+            if(navigator.msSaveOrOpenBlob){
+                var blob = new Blob(['\ufeff', tableHTMLData], {
+                    type: dataFileType
+                });
+                navigator.msSaveOrOpenBlob( blob, filename);
+            }else{
+                // Create a link to the file
+                downloadurl.href = 'data:' + dataFileType + ', ' + tableHTMLData;
+
+                // Setting the file name
+                downloadurl.download = filename;
+
+                //triggering the function
+                downloadurl.click();
+            }
+        }
+
+
+
+
+var month = ["x","2018-03-05","2018-04-05","2018-05-06","2018-06-05"];
+        eSub = ["AWN",12345,23456,34567,45678];
         table = document.getElementById("table");
 
-    /* Method 1
-    // rows
-    for(var i = 1; i < table.rows.length; i++)
-    {
-      // cells
-      for(var j = 0; j < table.rows[i].cells.length; j++)
-      {
-          table.rows[i].cells[j].innerHTML = array[i - 1][j];
-      }
-    }
-        */
 
-    // Method 2
 
- /*   for(var i = 0; i < array.length; i++)
-    {
-        // create a new row
-        var newRow = table.insertRow(table.length);
-        for(var j = 0; j < array[i].length; j++)
-        {
-            // create a new cell
-            var cell = newRow.insertCell(j);
 
-            // add value to the cell
-            cell.innerHTML = array[i][j];
-        }
-    }*/
-
-    // open loop for each row and append cell
-    for (i = 0; i < table.rows.length; i++) {
-        for(var j = 0; j < array[i].length; j++) {
-            let cell = table.rows[i].insertCell(j+1);
-            cell.innerHTML = array[j][i];
-        }
-
-    }
-for(var j = 0; j < array[i].length; j++) {
-
+/*let newRow = table.insertRow(table.length);
+let cell = newRow.insertCell(0);
+cell.innerHTML = "Traffic(GB)";*/
+for(let j = 1; j < month.length; j++) {
+    let cell = table.rows[0].insertCell(j);
+    cell.innerHTML = dateFormat(month[j]) ;
 }
+for(let j = 1; j < eSub.length; j++) {
+    let cell = table.rows[1].insertCell(j);
+    cell.innerHTML = eSub[j];
+}
+
+
 </script>
 
 </body>

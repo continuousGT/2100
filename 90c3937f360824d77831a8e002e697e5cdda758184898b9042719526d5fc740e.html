@@ -149,7 +149,8 @@
 
 
   <ul class = "accordion" data-accordion data-multi-expand = "true"  >
-    <li class = "accordion-item is-active">
+
+    <li class = "accordion-item ">
       <a href = "#collapse3" role = "tab" class = "accordion-title" id = "collapse3-heading"><h5>แสดง eSUB รายเดือน</h5></a>
       <div id = "collapse3" class = "accordion-content" role = "tabpanel" data-tab-content aria-labelledby = "panel1d-heading">
         <h4 align="center"> กราฟแสดง จำนวน eSUB รายเดือนของ TOT และ AWN</h4>
@@ -621,6 +622,37 @@
             <td><div class=" callout "><h6 class="text-right">{{roamTotalTest - nwCostAwnTest|totNumber}}&nbsp; &nbsp; บาท</h6></div></td>
           </tr>
         </table>
+      </div>
+    </li>
+    <li class = "accordion-item is-active">
+      <a href = "#collapse7" role = "tab" class = "accordion-title" id = "collapse7-heading"><h5>Download TOT eSUB</h5></a>
+      <div id = "collapse7" class = "accordion-content" role = "tabpanel" data-tab-content aria-labelledby = "panel1d-heading">
+        <h6 align="center"> ตารางแสดง eSUB ของ NT(TOT) traffic</h6>
+        <table id="table" class="table-scroll" >
+
+          <!-- The Row Number 0 -->
+          <tr>
+            <th>Month</th>
+
+            <!--<th>Age</th>-->
+          </tr>
+          <tr>
+
+            <th>eSUB</th>
+            <!--<th>Age</th>-->
+          </tr>
+          <!-- End Row Number 0 -->
+
+        </table>
+
+
+        <button onclick="exportToExcel('table', 'user-data')" type="button" class="button social twitter">
+          <i class="fa fa-twitter" aria-hidden="true"></i> Download
+        </button>
+
+
+
+
       </div>
     </li>
   </ul>
@@ -1728,8 +1760,74 @@
       else if (this.value == 'line') {
         chartEsub.transform('line');
       }
+        var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+        function dateFormat(d){
+            var t = new Date(d);
+            return monthNames[t.getMonth()]+'-'+t.getFullYear();
+        }
+
+        function exportToExcel(tableID, filename = ''){
+            var downloadurl;
+            var dataFileType = 'application/vnd.ms-excel';
+            var tableSelect = document.getElementById(tableID);
+            var tableHTMLData = tableSelect.outerHTML.replace(/ /g, '%20');
+
+            // Specify file name
+            filename = filename?filename+'.xls':'export_excel_data.xls';
+
+            // Create download link element
+            downloadurl = document.createElement("a");
+
+            document.body.appendChild(downloadurl);
+
+            if(navigator.msSaveOrOpenBlob){
+                var blob = new Blob(['\ufeff', tableHTMLData], {
+                    type: dataFileType
+                });
+                navigator.msSaveOrOpenBlob( blob, filename);
+            }else{
+                // Create a link to the file
+                downloadurl.href = 'data:' + dataFileType + ', ' + tableHTMLData;
+
+                // Setting the file name
+                downloadurl.download = filename;
+
+                //triggering the function
+                downloadurl.click();
+            }
+        }
+
+
+
+
+
+
+        table = document.getElementById("table");
+
+
+
+
+        /*let newRow = table.insertRow(table.length);
+        let cell = newRow.insertCell(0);
+        cell.innerHTML = "Traffic(GB)";*/
+        for(let j = 1; j < month.length; j++) {
+            let cell = table.rows[0].insertCell(j);
+            cell.innerHTML = dateFormat(month[j]) ;
+        }
+        for(let j = 1; j < tot_eSUB.length; j++) {
+            let cell = table.rows[1].insertCell(j);
+            cell.innerHTML = tot_eSUB[j];
+        }
     });
+
   };
+
+
+
+
+
 
 
 </script>
