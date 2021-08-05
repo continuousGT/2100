@@ -78,7 +78,13 @@
       for(let r = firstRow; r <= range.max.r; ++r) {
         let row = _.reduce(columns, (m, c, k) => {
           let cell = sheet[ec(r, c)];
-          m[k] = cell? cell.v : null;
+         // m[k] = cell? cell.v : null;
+            if (moment(cell.w, 'DD/MM/YYYY',true).isValid()){
+                m[k] = cell? cell.w.trim() : null;
+            } else {
+                m[k] = cell? cell.v : null;
+            }
+
           return m;
         }, {});
 
