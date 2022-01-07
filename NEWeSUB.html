@@ -1,0 +1,1768 @@
+<!DOCTYPE html>
+<head xmlns:v-bind="http://www.w3.org/1999/xhtml" xmlns:v-bind="http://www.w3.org/1999/xhtml"
+      xmlns:v-bind="http://www.w3.org/1999/xhtml">
+  <meta charset = "utf-8" />
+  <meta http-equiv = "x-ua-compatible" content = "ie = edge" />
+  <meta name = "viewport" content = "width = device-width, initial-scale = 1.0" />
+
+  <title>TOT featuring AWN</title>
+
+
+  <script src="dist/jquery-1.8.3.min.js"></script>
+  <script src="dist/papaparse.js"></script>
+  <script src="dist/foundation.min.js"></script>
+  <script src="dist/vue.js"></script>
+  <script src="https://unpkg.com/accounting-js"></script>
+
+  <script src="https://unpkg.com/vue-numeric"></script>
+
+  <link rel="stylesheet" href="dist/foundation.min.css">
+
+
+  <script src="dist/currency-validator.js"></script>
+  <style>
+    H6 {
+      text-align: right;
+    }
+    /*[v-cloak] {
+      display: none;
+    }*/
+    /*    #modal {
+          position: fixed;
+          font-family: Arial, Helvetica, sans-serif;
+          top: 0;
+          left: 0;
+          background: rgba(0, 0, 0, 0.9);
+          z-index: 99999;
+          height: 100%;
+          width: 100%;
+
+        }
+        .modalconent {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background: #fff;
+          width: 80%;
+          height: 40%;
+          padding: 20px;
+        }*/
+
+    label {
+        cursor: pointer;
+        /* Style as you please, it will become the visible UI component. */
+    }
+
+    #xlf {
+        opacity: 0;
+        position: absolute;
+        z-index: -1;
+    }
+
+  </style>
+  <link rel="stylesheet" href="dist/app.css">
+
+  <script src="dist/d3/d3.min.js"></script>
+  <script src="dist/billboard.min.js"></script>
+  <link rel="stylesheet" href="dist/billboard.min.css">
+  <script src="dist/BigInteger.min.js"></script>
+  <script src="dist/moment-with-locales.js"></script>
+
+  <script src="dist/xlsx.stlye.min.js"> </script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/file-saver@2.0.2/dist/FileSaver.min.js"></script>
+
+</head>
+
+<body>
+
+<div id="usage" style="overflow-x:scroll;  white-space:nowrap; display:inline-block;" >
+  <h4 class="success text-center" style= color:dodgerblue  >คำนวณ รายรับ รายจ่าย ตามสัญญาพันธมิตร 2100
+
+  </h4>
+
+
+  <ul class = "accordion" data-accordion data-multi-expand = "true"  >
+
+    <li class = "accordion-item ">
+      <a href = "#collapse3" role = "tab" class = "accordion-title" id = "collapse3-heading"><h5>แสดง eSUB รายเดือน</h5></a>
+      <div id = "collapse3" class = "accordion-content" role = "tabpanel" data-tab-content aria-labelledby = "panel1d-heading">
+        <h4 align="center"> กราฟแสดง จำนวน eSUB รายเดือนของ TOT และ AWN</h4>
+        <h5 align="center" style="color: red"> ชนิดของกราฟ
+          <input type="radio" name="chartTYPE" id="bar" checked="checked" value="bar">BAR
+          <input type="radio" name="chartTYPE" id="line" value="line">LINE</h5>
+        <br>
+        <div id="chartEsub"></div>
+
+      </div>
+    </li>
+    <li class = "accordion-item">
+      <a href = "#collapse4" role = "tab" class = "accordion-title" id = "collapse4-heading"><h5>แสดง ยอดเงิน รายเดือน</h5></a>
+      <div id = "collapse4" class = "accordion-content" role = "tabpanel" data-tab-content aria-labelledby = "panel1d-heading">
+        <h4 align="center"> กราฟแสดง รายได้/รายจ่าย แต่ละเดือนของสัญญาพันธมิตร 2100 ระหว่าง TOT และ AWN</h4>
+        <div id="chartMoney"></div>
+
+      </div>
+    </li>
+
+    <li class = "accordion-item">
+      <a href = "#collapse5" role = "tab" class = "accordion-title" id = "collapse5-heading"><h5>แสดง eSUB Utilization รายเดือน</h5></a>
+      <div id = "collapse5" class = "accordion-content" role = "tabpanel" data-tab-content aria-labelledby = "panel1d-heading">
+        <h5 align="center"> กราฟแสดง eSUB Utilization แต่ละเดือนของสัญญาพันธมิตร 2100 ระหว่าง TOT และ AWN</h5>
+        <table frame="box">
+
+          <tr>
+            <th style="text-align:center;color: orangered"> Max eSUB </th>
+
+            <th style="text-align:center;color: green" v-for="month in monthsfirsthalf">{{ month.text }}</th>
+          </tr>
+
+
+          <tr>
+            <td style="color: orangered">TOT 2.5 ล้าน</td>
+            <td><div id="totUtil_Mar2017"></div></td>
+            <td><div id="totUtil_Apr2017"></div></td>
+            <td><div id="totUtil_May2017"></div></td>
+            <td><div id="totUtil_Jun2017"></div></td>
+            <td><div id="totUtil_Jul2017"></div></td>
+            <td><div id="totUtil_Aug2017"></div></td>
+
+          </tr>
+          <tr>
+            <td style="color: orangered">AWN 10 ล้าน</td>
+            <td><div id="awnUtil_Mar2017"></div></td>
+            <td><div id="awnUtil_Apr2017"></div></td>
+            <td><div id="awnUtil_May2017"></div></td>
+            <td><div id="awnUtil_Jun2017"></div></td>
+            <td><div id="awnUtil_Jul2017"></div></td>
+            <td><div id="awnUtil_Aug2017"></div></td>
+          </tr>
+          <tr>
+            <td style="color: orangered">รวม 12.5 ล้าน</td>
+            <td><div id="totalUtil_Mar2017"></div></td>
+            <td><div id="totalUtil_Apr2017"></div></td>
+            <td><div id="totalUtil_May2017"></div></td>
+            <td><div id="totalUtil_Jun2017"></div></td>
+            <td><div id="totalUtil_Jul2017"></div></td>
+            <td><div id="totalUtil_Aug2017"></div></td>
+          </tr>
+        </table>
+        <br>
+        <table frame="box">
+
+          <tr>
+            <th style="text-align:center;color: orangered"> Max eSUB </th>
+
+            <th style="text-align:center;color: green" v-for="month in monthssecondhalf">{{ month.text }}</th>
+          </tr>
+
+
+          <tr>
+            <td style="color: orangered">TOT 2.5 ล้าน</td>
+            <td><div id="totUtil_Sep2017"></div></td>
+            <td><div id="totUtil_Oct2017"></div></td>
+            <td><div id="totUtil_Nov2017"></div></td>
+            <td><div id="totUtil_Dec2017"></div></td>
+            <td><div id="totUtil_Jan2018"></div></td>
+            <td><div id="totUtil_Feb2018"></div></td>
+          </tr>
+          <tr>
+            <td style="color: orangered">AWN 10 ล้าน</td>
+            <td><div id="awnUtil_Sep2017"></div></td>
+            <td><div id="awnUtil_Oct2017"></div></td>
+            <td><div id="awnUtil_Nov2017"></div></td>
+            <td><div id="awnUtil_Dec2017"></div></td>
+            <td><div id="awnUtil_Jan2018"></div></td>
+            <td><div id="awnUtil_Feb2018"></div></td>
+          </tr>
+          <tr>
+            <td style="color: orangered">รวม 12.5 ล้าน</td>
+            <td><div id="totalUtil_Sep2017"></div></td>
+            <td><div id="totalUtil_Oct2017"></div></td>
+            <td><div id="totalUtil_Nov2017"></div></td>
+            <td><div id="totalUtil_Dec2017"></div></td>
+            <td><div id="totalUtil_Jan2018"></div></td>
+            <td><div id="totalUtil_Feb2018"></div></td>
+          </tr>
+        </table>
+      </div>
+    </li>
+    <li class = "accordion-item ">
+      <a href = "#collapse1" role = "tab" class = "accordion-title" id = "collapse1-heading"><h5>Summary
+        <select v-model="selected"  style="width:20%; height:auto; text-align:justify " >
+          <!-- inline object literal -->
+          <option v-for="(value, index) in monthText" :value =(index)>{{value.text}} </option>
+<!--          <option value="0">โปรดเลือกเดือน</option>
+          <option value="1">Usage March 2018</option>
+          <option value="2">Usage April 2018</option>
+          <option value="3">Usage May 2018</option>
+          <option value="4">Usage June 2018</option>
+          <option value="5">Usage July 2018</option>
+          <option value="6">Usage August 2018</option>
+          <option value="7">Usage September 2018</option>
+          <option value="8">Usage October 2018</option>
+          <option value="9">Usage November 2018</option>
+          <option value="10">Usage December 2018</option>
+          <option value="11">Usage January 2019</option>
+          <option value="12">Usage Febuary 2019</option>-->
+        </select>
+      </h5></a>
+      <div id = "collapse1" class = "accordion-content" role = "tabpanel" data-tab-content aria-labelledby = "panel1d-heading">
+        <table class="eak" width="100%">
+          <tr>
+            <td ><div class=" warning callout "><h6 class="text-center">Usage</h6></div></td>
+            <td ><div class=" warning callout "><h6 class="text-center">VOICE (sec)</h6></div></td>
+            <td ><div class=" warning callout "><h6 class="text-center">SMS (ครั้ง)</h6></div></td>
+            <td ><div class=" warning callout "><h6 class="text-center">Data (Byte)</h6></div></td>
+            <td ><div class=" warning callout "><h6 class="text-center">eSUB</h6></div></td>
+          </tr>
+          <tr>
+            <td ><div class=" primary callout "><h6 class="text-center">TOT</h6></div></td>
+            <td ><div class=" primary callout "><h6 class="text-center">{{totVoiceUsage|totNumber}}</h6></div></td>
+            <td ><div class=" primary callout "><h6 class="text-center">{{totSmsUsage|totNumber}}</h6></div></td>
+            <td ><div class=" primary callout "><h6 class="text-center">{{totDataUsage|totNumber}}</h6></div></td>
+            <td ><div class=" primary callout "><h6 class="text-center" style= color:blue >{{eSUBtot|totNumber}}</h6></div></td>
+          </tr>
+          <tr>
+            <td ><div class=" success callout "><h6 class="text-center">AWN</h6></div></td>
+            <td ><div class=" success callout "><h6 class="text-center">{{awnVoiceUsage|totNumber}}</h6></div></td>
+            <td ><div class=" success callout "><h6 class="text-center">{{awnSmsUsage|totNumber}}</h6></div></td>
+            <td ><div class=" success callout "><h6 class="text-center">{{awnDataUsage|totNumber}}</h6></div></td>
+            <td ><div class=" success callout "><h6 class="text-center" style= color:blue >{{eSUBawn|totNumber}}</h6></div></td>
+          </tr>
+        </table>
+
+        <hr>
+
+        <table  width="100%" >
+          <tr>
+            <td ><div class=" success callout " ><h5 class="text-center">ค่าใช้บริการ Roaming รวม&nbsp;&nbsp;   &nbsp;{{roamTotal|totNumber}} </h5></div></td>
+
+            <td ><div class=" alert callout "><h5 class="text-center">ค่าเช่าโครงข่ายรวม&nbsp;&nbsp;   &nbsp;{{nwCostTotal|totNumber}} </h5></div></td>
+
+          </tr>
+          <tr>
+            <td >
+              <table width="100%" >
+                <tr>
+                  <td style="padding: 0rem"><div class=" warning callout "><h6 class="text-center">ค่า ส่วนเกิน</h6></div></td>
+                  <td style="padding: 0rem"><div class=" success callout "><h6 class="text-center">ค่า Roaming</h6></div></td>
+                  <td style="padding: 0rem"><div class=" secondary callout "><h6 class="text-center">ค่าสำรองความจุโครงข่าย</h6></div></td>
+                </tr>
+                <tr>
+                  <td style="padding: 0rem"><div class=" warning callout "><h6 class="text-center">
+                    <span> 140 x </span>
+                    <span style= color:blue >{{overEsubAwn|totNumber}}</span></h6></div></td>
+                  <td style="padding: 0rem"><div class=" success callout "><h6 class="text-center">
+                    <span> 120 x </span>
+                    <span style= color:blue >{{eSUBawn-overEsubAwn|totNumber}}</span></h6></div></td>
+                  <td style="padding: 0rem"><div class=" secondary callout "><h6 class="text-center">
+                    <span> 32.5 x </span>
+                    <span style= color:blue >{{pensionEsub|totNumber}}</span></h6></div></td>
+                </tr>
+                <tr>
+                  <td style="padding: 0rem"><div class=" warning callout "><h6 class="text-center">
+                    {{overCost|totNumber}}</h6></div></td>
+                  <td style="padding: 0rem"><div class=" success callout "><h6 class="text-center">
+                    {{roamCost|totNumber}}</h6></div></td>
+                  <td style="padding: 0rem"><div class=" secondary callout "><h6 class="text-center">
+                    {{pensionCost|totNumber}}</h6></div></td>
+                </tr>
+              </table>
+            </td>
+            <td >
+              <table width="100%" >
+                <tr>
+                  <td style="padding: 0rem"><div class=" success callout "><h6 class="text-center">AWN traffic</h6></div></td>
+                  <td style="padding: 0rem"><div class=" primary callout "><h6 class="text-center">TOT traffic</h6></div></td>
+                </tr>
+                <tr>
+                  <td style="padding: 0rem"><div class=" success callout "><h6 class="text-center">
+                    <span>  87.5 x </span>
+                    <span style= color:blue >{{eSUBawn|totNumber}}</span></h6></div></td>
+                  <td style="padding: 0rem"><div class=" primary callout "><h6 class="text-center">
+                    <span>  65 x </span>
+                    <span style= color:blue >{{eSUBtot|totNumber}}</span></h6></div></td>
+                </tr>
+                <tr>
+                  <td style="padding: 0rem"><div class=" success callout "><h6 class="text-center">
+                    {{nwCostAwn|totNumber}}</h6></div></td>
+                  <td style="padding: 0rem"><div class=" primary callout "><h6 class="text-center">
+                    {{nwCostTot|totNumber}}</h6></div></td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+        </table>
+        <table style="width:100%">
+          <tr>
+            <td> <div class=" callout "><label for="xlf">ออกรายงาน</label><input type="file" name="xlfile" id="xlf" /></div></td>
+            <td><div class=" callout "><span>&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; </span>
+              <span style="color: blue">DiFF = </span>
+              <span style="color: green"> {{roamTotal|totNumber}}</span>
+              <span> - </span>
+              <span style="color: red"> {{nwCostAwn|totNumber}}</span>
+              <span>&nbsp; &nbsp;&nbsp; </span></div>
+            </td>
+            <td><div class=" callout "><h6 class="text-right">{{roamTotal - nwCostAwn|totNumber}}&nbsp; &nbsp; บาท</h6></div></td>
+          </tr>
+        </table>
+      </div>
+    </li>
+
+    <li class = "accordion-item ">
+      <a href = "#collapse2" role = "tab" class = "accordion-title" id = "collapse2-heading"><h5>Detail</h5></a>
+
+      <div id = "collapse2" class = "accordion-content" role = "tabpanel" data-tab-content aria-labelledby = "panel1d-heading">
+
+        <table >
+          <tr>
+            <td ><div class=" warning callout ">USAGE</div></td>
+            <td ><div class=" warning callout ">VOICE (GB)</div></td>
+            <td ><div class=" warning callout ">SMS (GB)</div></td>
+            <td ><div class=" warning callout ">DATA (GB)</div></td>
+            <td ><div class=" warning callout ">TOTAL (GB)</div></td>
+            <td ><div class=" warning callout ">GB/SUB</div></td>
+            <td ><div class=" warning callout "><h6 class ="text-center">eSUB</h6></div></td>
+          </tr>
+          <tr>
+            <td ><div class=" primary callout ">TOT</div></td>
+            <td ><div class=" primary callout "><h6>{{totVoiceGB|totNumber}}</h6></div></td>
+            <td ><div class=" primary callout "><h6>{{totSmsGB|totNumber}}</h6></div></td>
+            <td ><div class=" primary callout "><h6>{{totDataGB|totNumber}}</h6></div></td>
+            <td ><div class=" primary callout "><h6>{{totAllGB|totNumber}}</h6></div></td>
+            <td ><div class=" primary callout "><h6>{{totGBpSUB}}</h6></div></td>
+            <td ><div class=" primary callout ">
+              <h6 class="text-center" style= color:blue >{{eSUBtot|totNumber}}</h6></div></td>
+          </tr>
+          <tr>
+            <td ><div class=" success callout ">AWN</div></td>
+            <td ><div class=" success callout "><h6>{{awnVoiceGB|totNumber}}</h6></div></td>
+            <td ><div class=" success callout "><h6>{{awnSmsGB|totNumber}}</h6></div></td>
+            <td ><div class=" success callout "><h6>{{awnDataGB|totNumber}}</h6></div></td>
+            <td ><div class=" success callout "><h6>{{awnAllGB|totNumber}}</h6></div></td>
+            <td ><div class=" primary callout "><h6>{{awnGBpSUB}}</h6></div></td>
+            <td ><div class=" success callout ">
+              <h6 class="text-center" style= color:blue >{{eSUBawn|totNumber}}</h6></div></td>
+            <!--<currency-input v-model="eSUBawn"></currency-input>-->
+            <!--{{eSUBawn|totNumber}}-->
+            <!--<input v-model="eSUBawn|totNumber" class ="small">-->
+            <!--{{eSUBtot|totNumber}}-->
+          </tr>
+        </table>
+        <table frame="border"  >
+          <tr >
+            <td colspan="4"><h5> กราฟแสดง eSUB utilization ประจำเดือน {{monthssecondhalf[monthssecondhalf.length-1].text}} </h5> </td>
+          </tr>
+          <tr>
+            <td style="text-align:center; valign:bottom"> ความจุเต็ม   </td>
+            <td style="color: orangered;text-align:center; valign:bottom">TOT 2.5 ล้าน</td>
+            <td style="color: orangered;text-align:center; valign:bottom">AWN 10 ล้าน</td>
+            <td style="color: orangered;text-align:center; valign:bottom">Total 12.5 ล้าน</td>
+          </tr>
+          <tr>
+            <td style="text-align:center;valign:bottom"> %การใช้งาน </td>
+            <td valign="top"><div id="totUtil_latest"></div></td>
+            <td valign="top"><div id="awnUtil_latest"></div></td>
+            <td valign="top"><div id="totalUtil_latest"></div></td>
+          </tr>
+        </table>
+
+      </div>
+
+    </li>
+
+
+    <li class = "accordion-item ">
+      <a href = "#collapse6" role = "tab" class = "accordion-title" id = "collapse6-heading"><h5>Try&Play</h5></a>
+      <div id = "collapse6" class = "accordion-content" role = "tabpanel" data-tab-content aria-labelledby = "panel1d-heading">
+        <div class="row" >
+          <div class="small-6 columns">
+            <div class=" warning callout ">
+              <div class ="row" >
+
+                <h6 class="text-center">Traffic ที SBN รวบรวม </h6>
+              </div>
+              <div class ="row" >
+
+                <div class ="small-6 columns">
+                  <div class="success callout ">
+                    <h6 class="text-center">AWN eSUB</h6>
+
+                    <input type="range" min="1" max="12500000" step="1" v-model="eSUBawnSBN" list="tickmarks">
+
+                    <!--<input type="text"  v-model="eSUBawnSBN" />-->
+                    <datalist id="tickmarks">
+                      <option value="1">
+                      <option value="1000000">
+                      <option value="2000000">
+                      <option value="3000000">
+                      <option value="4000000">
+                      <option value="5000000" label ="5M">
+                      <option value="6000000">
+                      <option value="7000000">
+                      <option value="8000000">
+                      <option value="9000000">
+                      <option value="10000000" label="10M">
+                      <option value="11000000">
+                      <option value="12000000">
+                    </datalist>
+                    <template>
+                      <vue-numeric  separator="," v-model="eSUBawnSBN"></vue-numeric>
+                    </template>
+                    <!--<currency-input v-model="eSUBawnSBN"></currency-input>-->
+                  </div>
+                </div>
+
+                <div class ="small-6 columns">
+                  <div class=" primary callout ">
+                    <h6 class="text-center">TOT eSUB</h6>
+
+                    <input type="range" min="1" max="2500000" step="1" v-model="eSUBtotSBN" list="tickmarks2">
+
+                    <!--<input type="text"  v-model="eSUBtotSBN" />-->
+                    <datalist id="tickmarks2">
+                      <option value="1"><option value="20000"><option value="40000"><option value="60000"><option value="80000">
+                      <option value="100000"><option value="120000"><option value="140000"><option value="1600000">
+                      <option value="180000"><option value="200000"><option value="220000"><option value="240000">
+                      <option value="260000"><option value="280000"><option value="300000"><option value="4000000">
+                      <option value="500000"><option value="600000"><option value="700000"><option value="800000">
+                      <option value="900000"><option value="1000000"><option value="1500000"><option value="2000000">
+                      <option value="2500000">
+                    </datalist>
+                    <template>
+                      <vue-numeric  separator="," v-model="eSUBtotSBN"></vue-numeric>
+                    </template>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class ="small-6 columns">
+            <div class ="secondary callout">
+              <div class="row small-uncollapse large-collapse" >
+                <div class="small-12 columns">
+                  <div class=" alert callout "><h6 class="text-center">ค่าเช่าโครงข่าย = {{nwCostTotalTest|totNumber}}บาท</h6></div>
+                </div>
+              </div>
+              <div class="row small-uncollapse large-collapse">
+                <div class="small-6 columns">
+                  <div class=" success callout "><h6 class="text-center">AWN traffic</h6></div>
+                </div>
+
+                <div class="small-6 columns">
+                  <div class=" primary callout "><h6 class="text-center">TOT traffic</h6></div>
+                </div>
+
+              </div>
+              <div class="row small-uncollapse large-collapse">
+                <div class="small-6 columns">
+                  <div class=" success callout "><h6 class="text-center"><span>  87.5 x </span>
+                    <span style= color:blue >{{eSUBawnSBN/1|totNumber}}</span>
+                  </h6></div>
+                </div>
+
+                <div class="small-6 columns">
+                  <div class=" primary callout "><h6 class="text-center"><span>  65 x </span>
+                    <span style= color:blue >{{eSUBtotSBN/1|totNumber}}</span></h6></div>
+                </div>
+
+              </div>
+              <div class="row small-uncollapse large-collapse">
+                <div class="small-6 columns">
+                  <div class=" success callout "><h6 class="text-center">{{nwCostAwnTest|totNumber}}</h6></div>
+                </div>
+
+                <div class="small-6 columns">
+                  <div class=" primary callout "><h6 class="text-center">{{nwCostTotTest|totNumber}}</h6></div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class ="row">
+
+          <div class ="small-12 columns">
+            <div class ="warning callout">
+              <div class="row small-uncollapse large-collapse" >
+                <div class="small-12 columns">
+                  <div class=" success callout "><h6 class="text-center">ค่า Roaming รวม = {{roamTotalTest|totNumber}} บาท</h6></div>
+                </div>
+              </div>
+
+              <div class="row small-uncollapse large-collapse" >
+                <div class="small-4 columns">
+                  <div class=" alert callout "><h6 class="text-center">ค่า ส่วนเกิน</h6></div>
+                </div>
+                <div class="small-4 columns">
+                  <div class=" success callout "><h6 class="text-center">ค่า Roaming</h6></div>
+                </div>
+
+                <div class="small-4 columns">
+                  <div class=" secondary callout "><h6 class="text-center">ค่าสำรองความจุโครงข่าย</h6></div>
+                </div>
+              </div>
+              <div class="row small-uncollapse large-collapse" >
+                <div class="small-4 columns">
+                  <div class=" alert callout "><h6 class="text-center"> <span> 140 x </span>
+                    <span style= color:blue >{{overEsubTest|totNumber}}</span></h6></div>
+                </div>
+                <div class="small-4 columns">
+                  <div class=" success callout "><h6 class="text-center"><span> 120 x </span>
+                    <span style= color:blue >{{eSUBawnSBN-overEsubTest|totNumber}}</span></h6></div>
+                </div>
+
+                <div class="small-4 columns">
+                  <div class=" secondary callout "><h6 class="text-center"><span> 32.5 x </span>
+                    <span style= color:blue >{{pensionEsubTest|totNumber}}</span></h6></div>
+                </div>
+              </div>
+              <div class="row small-uncollapse large-collapse" >
+                <div class="small-4 columns">
+                  <div class=" alert callout "><h6 class="text-center">{{overCostTest|totNumber}}</h6></div>
+                </div>
+                <div class="small-4 columns">
+                  <div class=" success callout "><h6 class="text-center">{{roamCostTest|totNumber}}</h6></div>
+                </div>
+
+                <div class="small-4 columns">
+                  <div class=" secondary callout "><h6 class="text-center">{{pensionCostTest|totNumber}}</h6></div>
+                </div>
+              </div>
+
+
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <table style="width:100%">
+          <tr>
+            <td> <div class=" callout "><h6 class="text-left">CROSS CHECK </h6></div></td>
+            <td><div class=" callout "><span>&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; </span>
+              <span style="color: green"> {{roamTotalTest|totNumber}}</span>
+              <span> - </span>
+              <span style="color: red"> {{nwCostAwnTest|totNumber}}</span>
+              <span>&nbsp; &nbsp;&nbsp; </span></div>
+            </td>
+            <td><div class=" callout "><h6 class="text-right">{{roamTotalTest - nwCostAwnTest|totNumber}}&nbsp; &nbsp; บาท</h6></div></td>
+          </tr>
+        </table>
+      </div>
+    </li>
+    <li class = "accordion-item is-active">
+      <a href = "#collapse7" role = "tab" class = "accordion-title" id = "collapse7-heading"><h5>Download TOT eSUB</h5></a>
+      <div id = "collapse7" class = "accordion-content" role = "tabpanel" data-tab-content aria-labelledby = "panel1d-heading">
+        <h6 align="center"> ตารางแสดง eSUB ของ NT(TOT) traffic</h6>
+        <table id="table" class="table-scroll" >
+
+          <!-- The Row Number 0 -->
+          <tr>
+            <th>Month</th>
+
+            <!--<th>Age</th>-->
+          </tr>
+          <tr>
+
+            <th>eSUB</th>
+            <!--<th>Age</th>-->
+          </tr>
+          <!-- End Row Number 0 -->
+
+        </table>
+
+
+        <button onclick="exportToExcel('table', 'user-data')" type="button" class="button social twitter">
+          <i class="fa fa-twitter" aria-hidden="true"></i> Download
+        </button>
+
+
+
+
+      </div>
+    </li>
+  </ul>
+
+
+</div>
+
+<script>
+  const FRACT_DIGIT = 6;    // How many Fraction Digit do you want?
+  const NO_DIGIT = 0;     // Check if still use
+  const Million = 1000*1000;
+  const V2Data = 5;  // Conversion Rate 1 min|1 SMS = 5MB
+  const PER_SUB_R1 = 8; // div with 8GB
+  const PER_SUB_R2 = 10; // div with 10GB
+  const PER_SUB_R3 = 12; // div with 12GB
+  const PER_SUB_R4 = 15; // div with 12GB
+
+  const ESUB_TOT_R1 = 15*Million; // TOT Esub Range 1
+  const ESUB_TOT_R2 = 18.8*Million; // TOT Esub Range 2
+  const ESUB_TOT_R3 = 30*Million; // TOT Esub Range 3
+  const ESUB_TOT_R4 = 37.5*Million; // TOT Esub Range 4
+
+  const ESUB_AWN_R1 = 80*Million; // AWN Esub Range 1
+  const ESUB_AWN_R2 = 100*Million; // AWN Esub Range 2
+  const ESUB_AWN_R3 = 120*Million; // AwN Esub Range 3
+  const ESUB_AWN_R4 = 150*Million; // AwN Esub Range 4
+
+  const ROAMING_RATE = 120;   // 120 baht per eSub
+  const PENSION_RATE = 32.5;  // 32.5 baht per eSub for < 10 mill eSub
+  const ROAMING_RATE2 = 140;  // 140 baht per eSub for > 10 mill eSub
+  const TYPE2_RATE  =  87.5;  // for AWN traffic that use core and radio
+  const TYPE1_RATE  =  65;   // for TOT traffic that uses only core
+  const GUARENTEE = 10*Million;
+  const TOT_MAX = 2.5*Million;
+  var dataJson;
+  var month = ["x"], tot_voice = [], tot_sms = [], tot_data = [];
+  var awn_voice = [], awn_sms = [], awn_data = [];
+  var tot_eSUB = ["TOT"];
+  var awn_eSUB = ["AWN"];
+  var tot_GBperSUB = [];
+  var awn_GBperSUB = [];
+  var tot_NWcost = ["ค่าเช่าโครงข่าย TOT"];
+  var awn_NWcost = ["ค่าเช่าโครงข่าย AWN"];
+  var roamCost_Arr = ["ค่า Roaming"];
+  var pensionCost_Arr = ["ค่าสำรองความจุโครงข่าย"];
+  var roamCostTotal = ["ค่าใช้บริการ Roaming รวม"];
+  var chartEsub;
+  var last6month =[];
+  var first6month=[];
+  var reportMonth ="";
+  var tempDate;
+
+
+  function voice2GB(voice) {
+    return parseFloat(((voice*V2Data)/(60*1024)).toFixed(6));
+  }
+  function sms2GB(sms) {
+    return parseFloat(((sms*V2Data)/1024).toFixed(6));
+  }
+  function data2GB(databyte) {
+    let largeNum = bigInt(parseFloatIgnoreCommas(databyte));
+    return largeNum/(1024*1024*1024);
+  }
+  function totGB_sub(totalGB){
+    if (totalGB <= ESUB_TOT_R1)
+      return PER_SUB_R1;
+    else if ((totalGB>ESUB_TOT_R1)&&(totalGB<=ESUB_TOT_R2))
+      return PER_SUB_R2;
+    else if ((totalGB>ESUB_TOT_R2)&&(totalGB<=ESUB_TOT_R3))
+      return PER_SUB_R3;
+    else if ((totalGB>ESUB_TOT_R3)&&(totalGB<=ESUB_TOT_R4))
+      return PER_SUB_R4;
+    else
+      return PER_SUB_R4;
+  }
+  function awnGB_sub(totalGB){
+    if (totalGB <= ESUB_AWN_R1)
+      return PER_SUB_R1;
+    else if ((totalGB>ESUB_AWN_R1)&&(totalGB<=ESUB_AWN_R2))
+      return PER_SUB_R2;
+    else if ((totalGB>ESUB_AWN_R2)&&(totalGB<=ESUB_AWN_R3))
+      return PER_SUB_R3;
+    else if ((totalGB>ESUB_AWN_R3)&&(totalGB<=ESUB_AWN_R4))
+      return PER_SUB_R4;
+    else
+      return PER_SUB_R4;
+  }
+  function parseFloatIgnoreCommas(value) {
+    if (typeof value == 'string') {
+      var numberNoCommas = value.replace(/,/g, '');
+      return parseFloat(numberNoCommas);
+    } else {
+      return value
+    }
+  }
+  function stringIgnoreCommas(value) {
+    if (typeof value != 'string') {
+      if (typeof value == 'number') {
+        return value.toString()
+      } else {
+        return " ";
+      }
+    } else {
+      // noinspection UnnecessaryLocalVariableJS
+      return value.replace(/,/g, '');
+
+    }
+  }
+  function calOverCost(eSUB){
+    if (eSUB > GUARENTEE){
+      return (eSUB-GUARENTEE)*ROAMING_RATE2
+    } else
+      return 0
+  }
+  function calRoamCost(eSUB){
+    if (eSUB > GUARENTEE){
+      return GUARENTEE*ROAMING_RATE
+    } else if (eSUB <= GUARENTEE){
+      return eSUB*ROAMING_RATE
+    }
+  }
+  function calPensionCost(eSUB){
+    if (eSUB > GUARENTEE){
+      return 0
+    } else if (eSUB <= GUARENTEE){
+      return (GUARENTEE-eSUB)*PENSION_RATE
+    }
+  }
+  function calUtil(eSUB, graphName, base) {
+    return bb.generate({
+      "data": {
+        "columns": [
+          ["data", eSUB * 100 / base]
+        ],
+        "type": "gauge",
+        "onclick": function (d, i) {
+          console.log("onclick", d, i);
+        },
+        "onover": function (d, i) {
+          console.log("onover", d, i);
+        },
+        "onout": function (d, i) {
+          console.log("onout", d, i);
+        }
+      },
+      "gauge": {},
+      "color": {
+        "pattern": [
+          "#60B044",
+          "#F6C600",
+          "#F97600",
+          "#FF0000",
+        ],
+        "threshold": {
+          "values": [
+            10,
+            40,
+            70,
+            100
+          ]
+        }
+      },
+      "size": {
+        "width": 120,
+        "height": 120
+      },
+      "bindto": graphName
+    });
+  }
+
+
+
+
+  try {
+    if (window.jQuery)
+    {
+      //console.log('jQuery is loaded');
+    }
+    else
+    {
+      //console.log('jQuery is not loaded');
+    }
+    if (typeof Vue === 'object') {
+      //console.log('Vue load');
+    };
+    if (typeof VueNumeric === 'object') {
+      //console.log('Vn load');
+    };
+    if (typeof bb === 'object') {
+      //console.log('bb load');
+    };
+    if (typeof Papa === 'object') {
+      //console.log('Papa load');
+    };
+
+    Vue.use(VueNumeric.default);
+    Vue.component('usage', {
+      // options
+    });
+    Vue.filter('totNumber', function (value) {
+      return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    });
+
+    Vue.component('currency-input', {
+      template: '\
+      <input\
+        ref="input"\
+        v-bind:value="value"\
+        v-on:input="updateValue($event.target.value)"\
+        v-on:focus="selectAll"\
+        v-on:blur="formatValue"\
+        size="20">\
+  ',
+      props: {
+        value: {
+          type: Number,
+          default: 0
+        }
+      },
+      mounted: function () {
+        this.formatValue()
+      },
+      methods: {
+        updateValue: function (value) {
+          var result = currencyValidator.parse(stringIgnoreCommas(value), this.value);
+          if (result.warning) {
+            this.$refs.input.value = result.value        }
+          this.$emit('input',result.value)
+
+
+//      this.$refs.input.value= this.value
+        },
+        formatValue: function () {
+          this.$refs.input.value = accounting.formatMoney(this.value, "", 0)
+//        this.$refs.input.value = this.value
+        },
+        selectAll: function (event) {
+          // Workaround for Safari bug
+          // http://stackoverflow.com/questions/1269722/selecting-text-on-focus-using-jquery-not-working-in-safari-and-chrome
+          setTimeout(function () {  // จริงๆ ไม่จำเป็น watch out
+            event.target.select()
+          }, 0)
+        }
+      }
+    });
+
+    var vm_usage = new Vue({
+      el: '#usage',
+      data: {
+        selected: 0,
+
+        totVoiceUsage: 60,
+        totSmsUsage: 1,
+        totDataUsage: 3221225472,
+        totGBperSUB:3,
+        awnVoiceUsage: 120,
+        awnSmsUsage: 2,
+        awnDataUsage: 3221225472*2,
+        awnGBperSUB:3,
+        eSUBtotSBN: 0,
+        eSUBawnTOT: 0,
+        eSUBtotAIS: 0,
+        eSUBawnSBN: 0,
+        monthText:[],
+        monthsfirsthalf: [
+          { text: 'test' },
+          { text: 'Apr-2018' },
+          { text: 'May-2018' },
+          { text: 'Jun-2018' },
+          { text: 'Jul-2018' },
+          { text: 'Aug-2018' }
+        ],
+        monthssecondhalf:[
+          { text: 'test' },
+          { text: 'Oct-2018' },
+          { text: 'Nov-2018' },
+          { text: 'Dec-2018' },
+          { text: 'Jan-2019' },
+          { text: 'Feb-2019' }
+        ]
+      },
+      watch: {
+        'selected': function (newVal, oldVal) {
+          // some condition
+          this.totVoiceUsage = tot_voice[parseInt(newVal)-1];
+          this.totSmsUsage = tot_sms[parseInt(newVal)-1];
+          this.totDataUsage = tot_data[parseInt(newVal)-1];
+          this.totGBperSUB = tot_GBperSUB[parseInt(newVal)-1];
+          this.awnVoiceUsage = awn_voice[parseInt(newVal)-1];
+          this.awnSmsUsage = awn_sms[parseInt(newVal)-1];
+          this.awnDataUsage = awn_data[parseInt(newVal)-1];
+          this.awnGBperSUB = awn_GBperSUB[parseInt(newVal)-1];
+          this.eSUBtotSBN = this.eSUBtot;
+          this.eSUBtotAIS = this.eSUBtot;
+          this.eSUBawnTOT = this.eSUBawn;
+          this.eSUBawnSBN = this.eSUBawn;
+
+          console.log(month[parseInt(newVal)]);
+            tempDate = moment(month[parseInt(newVal)]);
+            console.log(tempDate.month());
+            var thmonth = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน", "กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+            console.log(thmonth[tempDate.month()]+" "+(tempDate.year()+543));
+            reportMonth = thmonth[tempDate.month()]+" "+(tempDate.year()+543);
+            var totUtil_latest = calUtil(tot_eSUB[tot_eSUB.length-1], "#totUtil_latest", TOT_MAX);
+          var awnUtil_latest = calUtil(awn_eSUB[awn_eSUB.length-1], "#awnUtil_latest", GUARENTEE);
+          var totalUtil_latest = calUtil(awn_eSUB[awn_eSUB.length-1] + tot_eSUB[tot_eSUB.length-1], "#totalUtil_latest", GUARENTEE + TOT_MAX);
+
+        }
+      },
+      computed: {
+        totVoiceGB: function () {
+          return voice2GB(parseFloatIgnoreCommas(this.totVoiceUsage))
+        },
+        totSmsGB: function () {
+          return sms2GB(parseFloatIgnoreCommas(this.totSmsUsage))
+        },
+        totDataGB: function () {
+          return data2GB(parseFloatIgnoreCommas(this.totDataUsage))
+        },
+        totAllGB : function() {
+          return  this.totVoiceGB+this.totSmsGB+this.totDataGB
+        },
+        totGBpSUB : function() {
+          return  this.totGBperSUB
+        },
+        eSUBtot: function () {
+          return Math.round(this.totAllGB/totGB_sub(this.totAllGB))
+        },
+        awnVoiceGB: function () {
+          return voice2GB(parseFloatIgnoreCommas(this.awnVoiceUsage))
+        },
+        awnSmsGB: function () {
+          return sms2GB(parseFloatIgnoreCommas(this.awnSmsUsage))
+        },
+        awnDataGB: function () {
+          return data2GB(this.awnDataUsage)
+        },
+        awnAllGB : function() {
+          return  this.awnVoiceGB+this.awnSmsGB+this.awnDataGB
+        },
+        awnGBpSUB : function() {
+          return this.awnGBperSUB
+        },
+        eSUBawn: function () {
+          return Math.round(this.awnAllGB/awnGB_sub(this.awnAllGB))
+        },
+        overEsubAwn: function(){
+          if (this.eSUBawn>GUARENTEE){
+            return this.eSUBawn-GUARENTEE
+          } else {
+            return 0
+          }
+        },
+        pensionEsub: function () {
+          if (this.eSUBawn>GUARENTEE){
+            return 0
+          } else {
+            return GUARENTEE-this.eSUBawn
+          }
+        },
+        overCost: function(){
+          return calOverCost(this.eSUBawn)
+        },
+        roamCost: function () {
+          return calRoamCost(this.eSUBawn)
+        },
+        pensionCost: function() {
+          return calPensionCost(this.eSUBawn)
+        },
+        roamTotal : function () {
+          return this.overCost+this.roamCost +this.pensionCost
+        },
+        nwCostAwn :function () { // overTen
+            return this.eSUBawn*TYPE2_RATE
+        },
+        nwCostTot :function () {
+          return this.eSUBtot*TYPE1_RATE
+        },
+        nwCostTotal :function () {
+          return this.nwCostTot+this.nwCostAwn
+        },
+        overEsubTest: function(){
+          if (this.eSUBawnSBN>GUARENTEE){
+            return this.eSUBawnSBN-GUARENTEE
+          } else {
+            return 0
+          }
+        },
+        pensionEsubTest: function () {
+          if (this.eSUBawnSBN>GUARENTEE){
+            return 0
+          } else {
+            return GUARENTEE-this.eSUBawnSBN
+          }
+        },
+        overCostTest: function(){
+          return calOverCost(this.eSUBawnSBN)
+        },
+        roamCostTest: function () {    //   For Try and Play
+          return calRoamCost(this.eSUBawnSBN)
+        },
+        pensionCostTest: function() {
+          return calPensionCost(this.eSUBawnSBN)
+        },
+        roamTotalTest : function () {
+          return this.overCostTest+this.roamCostTest +this.pensionCostTest
+        },
+        nwCostAwnTest :function () { // overTen
+
+             return this.eSUBawnSBN*TYPE2_RATE
+
+        },
+        nwCostTotTest :function () {
+          return this.eSUBtotSBN*TYPE1_RATE
+        },
+        nwCostTotalTest :function () {
+          return this.nwCostTotTest+this.nwCostAwnTest
+        },
+        percent: {get: function () {
+          return Math.round(100*this.roamCostTest/this.roamTotalTest).toString()+'%'
+        },
+          set: function(newValue){
+
+          }
+        },
+
+      }
+    });
+
+
+
+  } catch (e) {
+    $(document).foundation();
+    $('#modal').foundation('open');
+  }
+  window.onload = function () {
+
+    try {
+      $(document).foundation();
+      vm_usage.percent = '50%';
+      vm_usage.eSUBawn = 0;
+      vm_usage.eSUBtotSBN = vm_usage.eSUBtot;
+      vm_usage.eSUBtotAIS = vm_usage.eSUBtot;
+      vm_usage.eSUBawnTOT = vm_usage.eSUBawn;
+      vm_usage.eSUBawnSBN = vm_usage.eSUBawn;
+      var csvfile = "https://continuousgt.github.io/2100/dist/awn_usage2018.csv";
+      // var csvfile = "dist/awn_usage2018.csv";   //
+      //  copy papa ทำกับ awn เหมือนกัน โดยให้ อันล่าง เป็น tot  อ่านของ Awn ก่อน แต่ ไม่ต้อง เรียก chart และ month ด้วย
+      Papa.parse(csvfile, {
+        download: true,
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+
+          $.each(results.data, function(rowNo, rowObj) {
+
+            $.each(rowObj, function (colName, cell) {
+
+              switch (colName) {
+                case 'month' : month[rowNo+1] = cell; break;
+                case 'voice' : awn_voice[rowNo] = cell; break;
+                case 'sms' : awn_sms[rowNo]= cell; break;
+                case 'data': awn_data[rowNo]= cell ;break;
+                default : console.log ("ERROR");
+              }
+            });
+            let total_GB = voice2GB(awn_voice[rowNo])+sms2GB(awn_sms[rowNo])+data2GB(awn_data[rowNo]);
+            awn_GBperSUB[rowNo] = awnGB_sub(total_GB);
+            awn_eSUB[rowNo+1] =  Math.round(total_GB/awn_GBperSUB[rowNo]);
+              // overTen
+                  awn_NWcost[rowNo+1] = awn_eSUB[rowNo+1]*TYPE2_RATE;
+
+            roamCost_Arr[rowNo+1] = calRoamCost(awn_eSUB[rowNo+1]);
+            pensionCost_Arr[rowNo+1] = calPensionCost(awn_eSUB[rowNo+1]);
+            roamCostTotal[rowNo+1] = roamCost_Arr[rowNo+1]+pensionCost_Arr[rowNo+1];
+          });
+          console.log("month = ",month);
+          console.log("voice = ",awn_voice);
+          console.log("sms = ",awn_sms);
+          console.log("data = ",awn_data);
+          console.log("GBperSUB",awn_GBperSUB);
+          console.log("awn_eSUB = ",awn_eSUB);
+          console.log(vm_usage.monthsfirsthalf[0].text);
+          vm_usage.monthText = awndate2Str(month);
+          console.log(vm_usage.monthText);
+          first6month = vm_usage.monthText.slice(vm_usage.monthText.length-12, vm_usage.monthText.length-6);
+          last6month = vm_usage.monthText.slice(vm_usage.monthText.length-6,vm_usage.monthText.length);
+
+          vm_usage.monthsfirsthalf = first6month;
+          vm_usage.monthssecondhalf = last6month;
+        }
+
+      });
+      function moment2Str(str){ // From  2018-03-30  to  mar-2018
+        let testDate = moment(str).format('MMM-YYYY');
+        return testDate;
+      }
+      function awndate2Str(strArr){ // From x,2018-03-30, ....  to  mar-2018
+        let i;
+        let output=[{text:'โปรดเลือกเดือน'}];
+        let temp;
+
+        for (i = 1; i < strArr.length; i++) {
+          output.push({text : moment2Str(strArr[i])});
+        }
+        return output;
+      }
+
+      function toMillion (labelValue) {
+
+        // Nine Zeroes for Billions
+        return Math.abs(Number(labelValue)) >= 1.0e+9
+
+          ? Math.abs(Number(labelValue)) / 1.0e+9 + "B"
+          // Six Zeroes for Millions
+          : Math.abs(Number(labelValue)) >= 1.0e+6
+
+            ? Math.abs(Number(labelValue)) / 1.0e+6 + "M"
+            // Three Zeroes for Thousands
+            : Math.abs(Number(labelValue)) >= 1.0e+3
+
+              ? Math.abs(Number(labelValue)) / 1.0e+3 + "K"
+
+              : Math.abs(Number(labelValue));
+
+      }
+      csvfile = "https://continuousgt.github.io/2100/dist/tot_usage2018.csv";
+      //csvfile = "dist/tot_usage2018.csv"
+      Papa.parse(csvfile, {
+        download: true,
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+          $.each(results.data, function (rowNo, rowObj) {
+            $.each(rowObj, function (colName, cell) {
+              switch (colName) {
+                case 'month':
+                  break;
+                case 'voice' :
+                  tot_voice[rowNo] = cell;
+                  break;
+                case 'sms' :
+                  tot_sms[rowNo] = cell;
+                  break;
+                case 'data':
+                  tot_data[rowNo] = cell;
+                  break;
+                default :
+                  console.log("ERROR");
+              }
+            });
+            let total_GB = voice2GB(tot_voice[rowNo]) + sms2GB(tot_sms[rowNo]) + data2GB(tot_data[rowNo]);
+            tot_GBperSUB[rowNo] = totGB_sub(total_GB);
+            tot_eSUB[rowNo + 1] = Math.round(total_GB / tot_GBperSUB[rowNo]);
+            tot_NWcost[rowNo + 1] = tot_eSUB[rowNo + 1] * TYPE1_RATE;
+
+          });
+          console.log("tot_esub = ",tot_eSUB);
+          chartEsub = bb.generate({
+            bindto: "#chartEsub",
+            size: {
+              width: 960,
+              height: 400
+            },
+            data: { // url: "dist/Month_eSub.txt" didn't work
+              type: "bar",
+              /*"labels": true,*/
+
+              "x": "x",
+              columns: [
+                month, tot_eSUB, awn_eSUB
+              ],
+              "labels": {
+                format: {
+                  "TOT": function(x) {
+                    return d3.format(',')(x)
+                  },
+                  "AWN": function(x) {
+                    return d3.format(',')(x)
+                  }
+                }
+              },
+              "axes": {
+                "TOT": "y",
+                "AWN": "y2"
+              },
+              "regions": {
+                "AWN": [
+                  {
+                    "end": month[month.length - 1],
+                    "style": "dashed"
+                  }
+                ]
+
+              }
+            },
+            "axis": {
+              "x": {
+                "type": "timeseries",
+                "tick": {
+                  "format": "%b-%Y"
+                },
+                "label": {
+                  "text": "month",
+                  "position": "outer-middle"
+                }
+              },
+              "y": {
+                "label": {
+                  "text": "T O T (e S U B)",
+                  "position": "outer-middle"
+                },
+                "tick": {
+                  format: d3.format(",.0s")
+                },
+                "max": 500000,
+                "min": 50000
+              },
+              "y2": {
+                "show": true,
+                "label": {
+                  "text": "A W N  (e S U B)",
+                  "position": "outer-middle"
+                },
+                "tick": {
+                  format: d3.format(",.0s")
+                },
+                "min": 2000000,
+                "max": 9500000
+              },
+              "rotated": true,
+            },
+            "tooltip": {
+              "format": {
+                "value": function (value, ratio, id) {
+                  var format = d3.format(',');
+                  return format(value);
+
+                }
+              }
+            },
+            /*            "grid": {
+                          "y": {
+                            "lines": [
+                              {
+                                "value": tot_eSUB[tot_eSUB.length - 1],
+                                "text": toMillion(tot_eSUB[tot_eSUB.length - 1]),
+                                "position": "start"
+
+                              },
+                              {
+                                "value": awn_eSUB[awn_eSUB.length - 1],
+                                "text": toMillion(awn_eSUB[awn_eSUB.length - 1]),
+                                "axis": "y2",
+                                "position": "end"
+                              }
+
+                            ],
+
+                          }
+                        },*/
+          });
+          chartEsub.resize({width:960,height:500/12*month.length});
+          var chartMoney = bb.generate({
+            "size": {
+              width: 960,
+              height: 400
+            },
+            "data": {
+              "x": "x",
+              "columns": [
+                month, tot_NWcost, awn_NWcost, roamCost_Arr, pensionCost_Arr
+              ],
+              "type": "bar",
+              "groups": [
+                [
+                  "ค่าเช่าโครงข่าย TOT",
+                  "ค่าเช่าโครงข่าย AWN"
+                ],
+                [
+                  "ค่า Roaming",
+                  "ค่าสำรองความจุโครงข่าย"
+                ]
+              ]
+            },
+            "axis": {
+              "x": {
+                "type": "timeseries",
+                "tick": {
+                  "format": "%b-%Y"
+                },
+                "label": {
+                  "text": "month",
+                  "position": "outer-center"
+                }
+              },
+              "y": {
+                "label": {
+                  "text": "จำนวนเงิน",
+                  "position": "outer-middle"
+                },
+                "tick": {
+                  format: d3.format(",.2s")
+                }
+              },
+              "rotated": true,
+            },
+            "grid": {
+              "y": {
+                "lines": [
+                  {
+                    "value": 500000000
+                  },
+                  {
+                    "value": 1000000000
+                  }
+                ]
+              }
+            },
+            "bindto": "#chartMoney",
+            "tooltip": {
+              "format": {
+                "value": function (value, ratio, id) {
+                  var format = d3.format(',.1f');
+                  return format(value);
+
+                }
+              },
+              contents: function (d, defaultTitleFormat, defaultValueFormat, color) {
+                var $$ = this, config = $$.config,
+                  titleFormat = config.tooltip_format_title || defaultTitleFormat,
+                  nameFormat = config.tooltip_format_name || function (name) {
+                    return name;
+                  },
+                  valueFormat = config.tooltip_format_value || defaultValueFormat,
+                  text, i, title, value, name, bgcolor;
+                var rental = 0;
+                for (i = 0; i < d.length; i++) {
+                  if (!(d[i] && (d[i].value || d[i].value === 0))) {
+                    continue;
+                  }
+
+                  if (!text) {
+                    title = titleFormat ? titleFormat(d[i].x) : d[i].x;
+                    text = "<table class='" + $$.CLASS.tooltip + "'>" + (title || title === 0 ? "<tr><th colspan='2'>" + title + "</th></tr>" : "");
+                  }
+                  rental += d[i].value;
+                  name = nameFormat(d[i].name);
+                  value = valueFormat(d[i].value, d[i].ratio, d[i].id, d[i].index);
+                  bgcolor = $$.levelColor ? $$.levelColor(d[i].value) : color(d[i].id);
+
+                  text += "<tr class='" + $$.CLASS.tooltipName + "-" + d[i].id + "'>";
+                  text += "<td class='name'><span style='background-color:" + bgcolor + "'></span>" + name + "</td>";
+                  text += "<td class='value'>" + value + "</td>";
+                  text += "</tr>";
+                  if (i === 1) {
+                    text += "<tr ><td style='background-color:lightcoral'>ค่าเช่าโครงข่ายรวม</td><td align=\"right\" style='background-color:lightcoral'>" + valueFormat(rental) + "</td>  </tr>";
+                    rental = 0;
+                  }
+                  if (i == 3) {
+                    text += "<tr ><td style='background-color:greenyellow'>ค่าใช้บริการ Roaming รวม</td><td align=\"right\" style='background-color:greenyellow'>" + valueFormat(rental) + "</td>  </tr>";
+                  }
+                }
+                return text + "</table>";
+              }
+            }
+          });
+          chartMoney.resize({width:960,height:500/12*month.length});
+          var totUtil_Mar2017 = calUtil(tot_eSUB[tot_eSUB.length-12], "#totUtil_Mar2017", TOT_MAX);
+          var totUtil_Apr2017 = calUtil(tot_eSUB[tot_eSUB.length-11], "#totUtil_Apr2017", TOT_MAX);
+          var totUtil_May2017 = calUtil(tot_eSUB[tot_eSUB.length-10], "#totUtil_May2017", TOT_MAX);
+          var totUtil_Jun2017 = calUtil(tot_eSUB[tot_eSUB.length-9], "#totUtil_Jun2017", TOT_MAX);
+          var totUtil_Jul2017 = calUtil(tot_eSUB[tot_eSUB.length-8], "#totUtil_Jul2017", TOT_MAX);
+          var totUtil_Aug2017 = calUtil(tot_eSUB[tot_eSUB.length-7], "#totUtil_Aug2017", TOT_MAX);
+          var totUtil_Sep2017 = calUtil(tot_eSUB[tot_eSUB.length-6], "#totUtil_Sep2017", TOT_MAX);
+          var totUtil_Oct2017 = calUtil(tot_eSUB[tot_eSUB.length-5], "#totUtil_Oct2017", TOT_MAX);
+          var totUtil_Nov2017 = calUtil(tot_eSUB[tot_eSUB.length-4], "#totUtil_Nov2017", TOT_MAX);
+          var totUtil_Dec2017 = calUtil(tot_eSUB[tot_eSUB.length-3], "#totUtil_Dec2017", TOT_MAX);
+          var totUtil_Jan2018 = calUtil(tot_eSUB[tot_eSUB.length-2], "#totUtil_Jan2018", TOT_MAX);
+          var totUtil_Feb2018 = calUtil(tot_eSUB[tot_eSUB.length-1], "#totUtil_Feb2018", TOT_MAX);
+          var awnUtil_Mar2017 = calUtil(awn_eSUB[awn_eSUB.length-12], "#awnUtil_Mar2017", GUARENTEE);
+          var awnUtil_Apr2017 = calUtil(awn_eSUB[awn_eSUB.length-11], "#awnUtil_Apr2017", GUARENTEE);
+          var awnUtil_May2017 = calUtil(awn_eSUB[awn_eSUB.length-10], "#awnUtil_May2017", GUARENTEE);
+          var awnUtil_Jun2017 = calUtil(awn_eSUB[awn_eSUB.length-9], "#awnUtil_Jun2017", GUARENTEE);
+          var awnUtil_Jul2017 = calUtil(awn_eSUB[awn_eSUB.length-8], "#awnUtil_Jul2017", GUARENTEE);
+          var awnUtil_Aug2017 = calUtil(awn_eSUB[awn_eSUB.length-7], "#awnUtil_Aug2017", GUARENTEE);
+          var awnUtil_Sep2017 = calUtil(awn_eSUB[awn_eSUB.length-6], "#awnUtil_Sep2017", GUARENTEE);
+          var awnUtil_Oct2017 = calUtil(awn_eSUB[awn_eSUB.length-5], "#awnUtil_Oct2017", GUARENTEE);
+          var awnUtil_Nov2017 = calUtil(awn_eSUB[awn_eSUB.length-4], "#awnUtil_Nov2017", GUARENTEE);
+          var awnUtil_Dec2017 = calUtil(awn_eSUB[awn_eSUB.length-3], "#awnUtil_Dec2017", GUARENTEE);
+          var awnUtil_Jan2018 = calUtil(awn_eSUB[awn_eSUB.length-2], "#awnUtil_Jan2018", GUARENTEE);
+          var awnUtil_Feb2018 = calUtil(awn_eSUB[awn_eSUB.length-1], "#awnUtil_Feb2018", GUARENTEE);
+          var totalUtil_Mar2017 = calUtil(awn_eSUB[awn_eSUB.length-12] + tot_eSUB[tot_eSUB.length-12], "#totalUtil_Mar2017", GUARENTEE + TOT_MAX);
+          var totalUtil_Apr2017 = calUtil(awn_eSUB[awn_eSUB.length-11] + tot_eSUB[tot_eSUB.length-11], "#totalUtil_Apr2017", GUARENTEE + TOT_MAX);
+          var totalUtil_May2017 = calUtil(awn_eSUB[awn_eSUB.length-10] + tot_eSUB[tot_eSUB.length-10], "#totalUtil_May2017", GUARENTEE + TOT_MAX);
+          var totalUtil_Jun2017 = calUtil(awn_eSUB[awn_eSUB.length-9] + tot_eSUB[tot_eSUB.length-9], "#totalUtil_Jun2017", GUARENTEE + TOT_MAX);
+          var totalUtil_Jul2017 = calUtil(awn_eSUB[awn_eSUB.length-8] + tot_eSUB[tot_eSUB.length-8], "#totalUtil_Jul2017", GUARENTEE + TOT_MAX);
+          var totalUtil_Aug2017 = calUtil(awn_eSUB[awn_eSUB.length-7] + tot_eSUB[tot_eSUB.length-7], "#totalUtil_Aug2017", GUARENTEE + TOT_MAX);
+          var totalUtil_Sep2017 = calUtil(awn_eSUB[awn_eSUB.length-6] + tot_eSUB[tot_eSUB.length-6], "#totalUtil_Sep2017", GUARENTEE + TOT_MAX);
+          var totalUtil_Oct2017 = calUtil(awn_eSUB[awn_eSUB.length-5] + tot_eSUB[tot_eSUB.length-5], "#totalUtil_Oct2017", GUARENTEE + TOT_MAX);
+          var totalUtil_Nov2017 = calUtil(awn_eSUB[awn_eSUB.length-4] + tot_eSUB[tot_eSUB.length-4], "#totalUtil_Nov2017", GUARENTEE + TOT_MAX);
+          var totalUtil_Dec2017 = calUtil(awn_eSUB[awn_eSUB.length-3] + tot_eSUB[tot_eSUB.length-3], "#totalUtil_Dec2017", GUARENTEE + TOT_MAX);
+          var totalUtil_Jan2018 = calUtil(awn_eSUB[awn_eSUB.length-2] + tot_eSUB[tot_eSUB.length-2], "#totalUtil_Jan2018", GUARENTEE + TOT_MAX);
+          var totalUtil_Feb2018 = calUtil(awn_eSUB[awn_eSUB.length-1] + tot_eSUB[tot_eSUB.length-1], "#totalUtil_Feb2018", GUARENTEE + TOT_MAX);
+
+
+        }
+      });
+    } catch (err){ $('#modal').foundation('open');} // alert("Internet มีปัญหา โปรด กดปุ่ม reload")}
+/*      $("#xlf").change(function(){
+        alert(vm_usage.eSUBtotSBN )        ;
+    } );*/
+      $("#xlf").change(function(e) {
+
+          console.log('in handle file');
+          var files = e.target.files;
+          var i,f;
+          for (i = 0, f = files[i]; i != files.length; ++i) {
+              var reader = new FileReader();
+              var name = f.name;
+              reader.onload = function(e) {
+                  var data = e.target.result;
+//  ลอง เปลี่ยน raw = true แก้ สีดำ ได้ไหม
+                  var workbook = XLSX.read(data, {type: 'binary',cellDates:true,cellStyles:true,cellNF:true});
+                  console.log(workbook);
+                  var sum_sheetName = workbook.SheetNames[0];
+                  var summary_worksheet = workbook.Sheets[sum_sheetName];
+                  var rep_TOT_worksheet = workbook.Sheets[workbook.SheetNames[1]];
+                  var rep_AWN_worksheet = workbook.Sheets[workbook.SheetNames[4]];
+                  var TOT_2_worksheet = workbook.Sheets[workbook.SheetNames[2]];
+                  var TOT_3_worksheet = workbook.Sheets[workbook.SheetNames[3]];
+                  var AWN_2_worksheet = workbook.Sheets[workbook.SheetNames[5]];
+                  var AWN_2_20_worksheet = workbook.Sheets[workbook.SheetNames[6]];
+                  var AWN_2_80_worksheet = workbook.Sheets[workbook.SheetNames[7]];
+
+                  console.log(workbook.SheetNames[2]);
+                  console.log(workbook.SheetNames[3]);
+                  console.log(workbook.SheetNames[5]);
+                  console.log(workbook.SheetNames[6]);
+                  console.log(workbook.SheetNames[7]);
+// TOT eSUB
+                  summary_worksheet["I5"].v = vm_usage.eSUBtotSBN;
+                  rep_TOT_worksheet["C5"].v = vm_usage.eSUBtotSBN;
+                  TOT_3_worksheet["D65"].v = vm_usage.eSUBtotSBN;
+                  AWN_2_20_worksheet["D69"].v = vm_usage.eSUBtotSBN;
+
+                  summary_worksheet["J5"].v = vm_usage.eSUBtotSBN*TYPE1_RATE;
+
+// TOT GB         จริงๆ เป็นข้อมูล tot sub แต่ เอา ไป ฝาก print ไว้ที่ sheet TOT3 ที่เป็น detail ของ AWN  !!!!!
+                  TOT_3_worksheet["D50"].v = vm_usage.totVoiceGB;
+                  TOT_3_worksheet["D51"].v = vm_usage.totSmsGB;
+                  TOT_3_worksheet["D52"].v = vm_usage.totDataGB;
+                  TOT_3_worksheet["D53"].v = vm_usage.totAllGB;
+                  TOT_3_worksheet["D54"].v = TOT_3_worksheet["D53"].v/Million;
+                  TOT_3_worksheet["D56"].v = vm_usage.totGBperSUB;
+                  //  ใส่ใน Awn_2_20 ด้วย ส่งให้ กรรมการตรวจรับ
+                  AWN_2_20_worksheet["D55"].v = vm_usage.totVoiceGB;
+                  AWN_2_20_worksheet["D56"].v = vm_usage.totSmsGB;
+                  AWN_2_20_worksheet["D57"].v = vm_usage.totDataGB;
+                  AWN_2_20_worksheet["D58"].v = vm_usage.totAllGB;
+                  AWN_2_20_worksheet["D59"].v = TOT_3_worksheet["D53"].v/Million;
+                  AWN_2_20_worksheet["D61"].v = vm_usage.totGBperSUB;
+
+// AWN GB
+                  AWN_2_worksheet["D50"].v = vm_usage.awnVoiceGB;
+                  AWN_2_worksheet["D51"].v = vm_usage.awnSmsGB;
+                  AWN_2_worksheet["D52"].v = vm_usage.awnDataGB;
+                  AWN_2_worksheet["D53"].v = vm_usage.awnAllGB;
+                  AWN_2_worksheet["D54"].v = AWN_2_worksheet["D53"].v/Million;
+                  AWN_2_worksheet["D56"].v = vm_usage.awnGBperSUB;
+                  //  ใส่ใน Awn_3_80 ด้วย ส่งให้ กรรมการตรวจรับ
+                  AWN_2_80_worksheet["D50"].v = vm_usage.awnVoiceGB;
+                  AWN_2_80_worksheet["D51"].v = vm_usage.awnSmsGB;
+                  AWN_2_80_worksheet["D52"].v = vm_usage.awnDataGB;
+                  AWN_2_80_worksheet["D53"].v = vm_usage.awnAllGB;
+                  AWN_2_80_worksheet["D54"].v = AWN_2_worksheet["D53"].v/Million;
+                  AWN_2_80_worksheet["D56"].v = vm_usage.awnGBperSUB;
+
+// AWN eSUB
+
+                  summary_worksheet["I7"].v = vm_usage.eSUBawn;  // total AWN eSUB
+                  rep_TOT_worksheet["C7"].v = vm_usage.eSUBawn;  // total AWN eSUB
+
+                  TOT_3_worksheet["D66"].v = vm_usage.eSUBawn;
+
+                  AWN_2_80_worksheet["D64"].v = vm_usage.eSUBawn;
+
+                  if (vm_usage.eSUBawn < 10000000) {
+                      summary_worksheet["D5"].v = vm_usage.eSUBawn;
+                      summary_worksheet["D7"].v = 10000000-vm_usage.eSUBawn;
+                      rep_AWN_worksheet["C7"].v = 10000000-vm_usage.eSUBawn;
+                      AWN_2_worksheet["D66"].v = 10000000-vm_usage.eSUBawn;
+                  } else {
+                      summary_worksheet["D5"].v = 10000000;
+                      summary_worksheet["D7"].v = 0;
+                      rep_AWN_worksheet["C7"].v = 0;
+                      AWN_2_worksheet["D66"].v = 0;
+                      summary_worksheet["D9"].v = vm_usage.eSUBawn-10000000;
+                      rep_AWN_worksheet["C9"].v = vm_usage.eSUBawn-10000000;
+                      AWN_2_worksheet["D67"].v = vm_usage.eSUBawn-10000000;
+                  }
+                  rep_AWN_worksheet["C5"].v = summary_worksheet["D5"].v;
+                  AWN_2_worksheet["D65"].v = summary_worksheet["D5"].v;
+
+                  summary_worksheet["E5"].v = calRoamCost(vm_usage.eSUBawn);
+                  summary_worksheet["E7"].v = calPensionCost(vm_usage.eSUBawn);
+                  summary_worksheet["E9"].v = calOverCost(vm_usage.eSUBawn);
+                  summary_worksheet["E11"].v = summary_worksheet["E5"].v+summary_worksheet["E7"].v+summary_worksheet["E9"].v;
+// overTen
+                  summary_worksheet["J7"].v = vm_usage.eSUBawn * TYPE2_RATE;
+
+
+                  summary_worksheet["J11"].v = summary_worksheet["J5"].v+summary_worksheet["J7"].v;
+
+                  rep_TOT_worksheet["D5"].v = summary_worksheet["J5"].v;
+                  rep_TOT_worksheet["D7"].v = summary_worksheet["J7"].v;
+                  rep_TOT_worksheet["D9"].v = summary_worksheet["J11"].v;
+                  rep_AWN_worksheet["D5"].v = summary_worksheet["E5"].v;
+                  rep_AWN_worksheet["D7"].v = summary_worksheet["E7"].v;
+                  rep_AWN_worksheet["D9"].v = summary_worksheet["E9"].v;
+                  rep_AWN_worksheet["D11"].v = summary_worksheet["E11"].v;
+
+                  AWN_2_worksheet["D70"].v = rep_AWN_worksheet["D5"].v;
+                  AWN_2_worksheet["D72"].v = rep_AWN_worksheet["D7"].v;
+                  AWN_2_worksheet["D74"].v = rep_AWN_worksheet["D9"].v;
+                  AWN_2_worksheet["D76"].v = rep_AWN_worksheet["D11"].v;
+
+                  TOT_3_worksheet["D70"].v = rep_TOT_worksheet["D5"].v;
+                  TOT_3_worksheet["D72"].v = rep_TOT_worksheet["D7"].v;
+                  TOT_3_worksheet["D74"].v = rep_TOT_worksheet["D9"].v;
+
+// report month
+                  summary_worksheet["B2"].v = "ประจำเดือน"+reportMonth;
+                  rep_TOT_worksheet["B2"].v = "ประจำเดือน"+reportMonth;
+                  rep_AWN_worksheet["B2"].v = "ประจำเดือน"+reportMonth;
+                  TOT_2_worksheet["B2"].v = "ประจำเดือน"+reportMonth;
+                  TOT_3_worksheet["B2"].v = "ประจำเดือน"+reportMonth;
+                  AWN_2_worksheet["B2"].v = "ประจำเดือน"+reportMonth;
+                  AWN_2_20_worksheet["B2"].v = "ประจำเดือน"+reportMonth;
+                  AWN_2_80_worksheet["B2"].v = "ประจำเดือน"+reportMonth;
+
+// correct black cell of summary_worksheet
+                  summary_worksheet["E5"].s = summary_worksheet["D5"].s;
+                  summary_worksheet["E6"].s = summary_worksheet["D6"].s;
+                  summary_worksheet["E7"].s = summary_worksheet["D7"].s;
+                  summary_worksheet["E8"].s = summary_worksheet["D8"].s;
+                  summary_worksheet["E9"].s = summary_worksheet["D9"].s;
+                  summary_worksheet["G5"].s = summary_worksheet["B5"].s;
+                  summary_worksheet["G6"].s = summary_worksheet["B6"].s;
+                  summary_worksheet["G7"].s = summary_worksheet["B7"].s;
+                  summary_worksheet["G8"].s = summary_worksheet["B8"].s;
+                  summary_worksheet["G9"].s = summary_worksheet["B9"].s;
+                  summary_worksheet["G10"].s = summary_worksheet["B10"].s;
+                  summary_worksheet["I5"].s = summary_worksheet["D5"].s;
+                  summary_worksheet["I6"].s = summary_worksheet["D6"].s;
+                  summary_worksheet["I7"].s = summary_worksheet["D7"].s;
+                  summary_worksheet["I8"].s = summary_worksheet["D8"].s;
+                  summary_worksheet["I9"].s = summary_worksheet["D9"].s;
+                  summary_worksheet["I10"].s = summary_worksheet["D10"].s;
+                  summary_worksheet["J5"].s = summary_worksheet["D5"].s;
+                  summary_worksheet["J6"].s = summary_worksheet["D6"].s;
+                  summary_worksheet["J7"].s = summary_worksheet["D7"].s;
+                  summary_worksheet["J8"].s = summary_worksheet["D8"].s;
+                  summary_worksheet["J9"].s = summary_worksheet["D9"].s;
+                  summary_worksheet["J10"].s = summary_worksheet["D10"].s;
+
+                  rep_TOT_worksheet["B5"].s = summary_worksheet["B5"].s;
+                  rep_TOT_worksheet["B6"].s = summary_worksheet["B6"].s;
+                  rep_TOT_worksheet["B7"].s = summary_worksheet["B7"].s;
+                  rep_TOT_worksheet["B8"].s = summary_worksheet["B8"].s;
+                  rep_TOT_worksheet["C5"].s = summary_worksheet["I5"].s;
+                  rep_TOT_worksheet["C7"].s = summary_worksheet["I7"].s;
+                  rep_TOT_worksheet["C8"].s = summary_worksheet["C8"].s;
+                  rep_TOT_worksheet["D5"].s = summary_worksheet["D5"].s;
+                  rep_TOT_worksheet["D6"].s = summary_worksheet["D6"].s;
+                  rep_TOT_worksheet["D7"].s = summary_worksheet["D7"].s;
+                  rep_TOT_worksheet["D8"].s = summary_worksheet["D8"].s;
+                  rep_TOT_worksheet["!ref"] = "B1:E21";
+
+                  rep_AWN_worksheet["C5"].s = summary_worksheet["C5"].s;
+                  rep_AWN_worksheet["D5"].s = summary_worksheet["D5"].s;
+                  rep_AWN_worksheet["B6"].s = summary_worksheet["B6"].s;
+                  rep_AWN_worksheet["C6"].s = summary_worksheet["C6"].s;
+                  rep_AWN_worksheet["D6"].s = summary_worksheet["D6"].s;
+                  rep_AWN_worksheet["C7"].s = summary_worksheet["C7"].s;
+                  rep_AWN_worksheet["D7"].s = summary_worksheet["D7"].s;
+                  rep_AWN_worksheet["B8"].s = summary_worksheet["B8"].s;
+                  rep_AWN_worksheet["C8"].s = summary_worksheet["C8"].s;
+                  rep_AWN_worksheet["D8"].s = summary_worksheet["D8"].s;
+                  rep_AWN_worksheet["D10"].s = rep_AWN_worksheet["C10"].s;
+                  rep_AWN_worksheet["B12"].s = summary_worksheet["B13"].s;
+                  rep_AWN_worksheet["C12"].s = summary_worksheet["B13"].s;
+                  rep_AWN_worksheet["D12"].s = summary_worksheet["B13"].s;
+                  rep_AWN_worksheet["!ref"] = "B1:D23";
+               //   rep_AWN_worksheet["!cols"] = rep_TOT_worksheet["!cols"];
+
+                  // correct black cell of TOT_3_worksheet
+                  TOT_3_worksheet["B50"].s = TOT_3_worksheet["E50"].s;
+                  TOT_3_worksheet["B51"].s = TOT_3_worksheet["E51"].s;
+                  TOT_3_worksheet["D51"].s = TOT_3_worksheet["E51"].s;
+                  TOT_3_worksheet["B52"].s = TOT_3_worksheet["E52"].s;
+                  TOT_3_worksheet["D52"].s = TOT_3_worksheet["E52"].s;
+                  TOT_3_worksheet["D53"].s = TOT_3_worksheet["E53"].s;
+                  TOT_3_worksheet["D54"].s = TOT_3_worksheet["E54"].s;
+                  TOT_3_worksheet["D55"].s = TOT_3_worksheet["E55"].s;
+
+                  TOT_3_worksheet["B60"].s = AWN_2_20_worksheet["B64"].s;  // เลื่อนลง 1 เลื่อนขึ้น 2 = เลื่อนขึ้น 1
+                  TOT_3_worksheet["C60"].s = AWN_2_20_worksheet["B64"].s;
+
+                  TOT_3_worksheet["B70"].s = rep_TOT_worksheet["B5"].s;
+                  TOT_3_worksheet["B71"].s = rep_TOT_worksheet["B6"].s;
+                  TOT_3_worksheet["C71"].s = TOT_3_worksheet["B71"].s;
+                  TOT_3_worksheet["B72"].s = rep_TOT_worksheet["B7"].s;
+                  TOT_3_worksheet["B73"].s = rep_TOT_worksheet["B8"].s;
+                  TOT_3_worksheet["D70"].s = rep_TOT_worksheet["D5"].s;
+                  TOT_3_worksheet["D71"].s = TOT_3_worksheet["B71"].s;
+                  TOT_3_worksheet["D72"].s = TOT_3_worksheet["D70"].s;
+                  TOT_3_worksheet["D73"].s = rep_TOT_worksheet["D8"].s;
+
+                  AWN_2_worksheet["B50"].s = TOT_3_worksheet["B50"].s;
+                  AWN_2_worksheet["D50"].s = TOT_3_worksheet["D50"].s;
+                  AWN_2_worksheet["E50"].s = TOT_3_worksheet["E50"].s;
+                  AWN_2_worksheet["B51"].s = TOT_3_worksheet["B51"].s;
+                  AWN_2_worksheet["D51"].s = TOT_3_worksheet["D51"].s;
+                  AWN_2_worksheet["E51"].s = TOT_3_worksheet["E51"].s;
+                  AWN_2_worksheet["B52"].s = TOT_3_worksheet["B52"].s;
+                  AWN_2_worksheet["D52"].s = TOT_3_worksheet["D52"].s;
+                  AWN_2_worksheet["E52"].s = TOT_3_worksheet["E52"].s;
+                  AWN_2_worksheet["B53"].s = TOT_3_worksheet["B53"].s;
+                  AWN_2_worksheet["D53"].s = TOT_3_worksheet["D53"].s;
+                  AWN_2_worksheet["E53"].s = TOT_3_worksheet["E53"].s;
+                  AWN_2_worksheet["D54"].s = AWN_2_20_worksheet["D59"].s
+                  AWN_2_worksheet["E54"].s = TOT_3_worksheet["E54"].s;
+                  AWN_2_worksheet["D55"].s = TOT_3_worksheet["D55"].s;
+                  AWN_2_worksheet["E55"].s = TOT_3_worksheet["E55"].s;
+                  AWN_2_worksheet["D65"].s = TOT_3_worksheet["D65"].s;
+                  AWN_2_worksheet["D66"].s = TOT_3_worksheet["D66"].s;
+                  AWN_2_worksheet["D67"].s = TOT_3_worksheet["D67"].s;
+                  AWN_2_worksheet["B70"].s = TOT_3_worksheet["B70"].s;
+                  AWN_2_worksheet["D69"].s = AWN_2_worksheet["B69"].s;
+                  AWN_2_worksheet["D70"].s = rep_AWN_worksheet["D5"].s;
+                  AWN_2_worksheet["B71"].s = TOT_3_worksheet["B71"].s;
+                  AWN_2_worksheet["D71"].s = TOT_3_worksheet["D71"].s;
+                  AWN_2_worksheet["D72"].s = TOT_3_worksheet["D72"].s;
+                  AWN_2_worksheet["B73"].s = TOT_3_worksheet["B73"].s;
+                  AWN_2_worksheet["D73"].s = TOT_3_worksheet["D73"].s;
+                  AWN_2_worksheet["D74"].s = TOT_3_worksheet["D72"].s;
+                  AWN_2_worksheet["D75"].s = TOT_3_worksheet["D73"].s;
+
+                  AWN_2_20_worksheet["B55"].s = TOT_3_worksheet["B50"].s;
+                  AWN_2_20_worksheet["B56"].s = TOT_3_worksheet["B51"].s;
+                  AWN_2_20_worksheet["B57"].s = TOT_3_worksheet["B52"].s;
+                  AWN_2_20_worksheet["D55"].s = TOT_3_worksheet["D50"].s;
+                  AWN_2_20_worksheet["D56"].s = TOT_3_worksheet["D51"].s;
+                  AWN_2_20_worksheet["D57"].s = TOT_3_worksheet["D52"].s;
+                  AWN_2_20_worksheet["D69"].s = TOT_3_worksheet["D65"].s;
+
+                  AWN_2_80_worksheet["B50"].s = TOT_3_worksheet["B50"].s;
+                  AWN_2_80_worksheet["B51"].s = TOT_3_worksheet["B51"].s;
+                  AWN_2_80_worksheet["B52"].s = TOT_3_worksheet["B52"].s;
+                  AWN_2_80_worksheet["D50"].s = TOT_3_worksheet["D50"].s;
+                  AWN_2_80_worksheet["D51"].s = TOT_3_worksheet["D51"].s;
+                  AWN_2_80_worksheet["D52"].s = TOT_3_worksheet["D52"].s;
+                  AWN_2_80_worksheet["D64"].s = TOT_3_worksheet["D65"].s;
+
+// correct rown hieght
+                  var rowsH = [
+                      {hpx:27},{hpx:21},{hpx:21},{hpx:21},{hpx:51},
+                      {hpx:21},{hpx:21},{hpx:21},{hpx:21},{hpx:21},{hpx:21},{hpx:21},{hpx:21},
+                      {hpx:21},{hpx:21},{hpx:21},{hpx:21},{hpx:21},{hpx:21},{hpx:21},{hpx:21},
+                      {hpx:21},{hpx:21}
+                  ];
+                  summary_worksheet['!rows']=rowsH;
+
+
+
+// Save  workbook
+                  /* bookType can be 'xlsx' or 'xlsm' or 'xlsb' */
+                  var wopts = { bookType:'xlsx', bookSST:false, type:'binary' };
+
+                  var wbout = XLSX.write(workbook,wopts);
+
+                  function s2ab(s) {
+                      var buf = new ArrayBuffer(s.length);
+                      var view = new Uint8Array(buf);
+                      for (var i=0; i!=s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
+                      return buf;
+                  }
+                  var fileName = "Rep_"+(tempDate.month()+1)+"_"+(tempDate.year()+543)+".xlsx";
+                  /* the saveAs call downloads a file on the local machine */
+                  saveAs(new Blob([s2ab(wbout)],{type:""}), fileName);
+
+
+
+              };
+              reader.readAsBinaryString(f);
+          }
+      });
+    $('input[type=radio][name=chartTYPE]').change(function() {
+      if (this.value == 'bar') {
+        chartEsub.transform('bar');
+      }
+      else if (this.value == 'line') {
+        chartEsub.transform('line');
+      }
+        var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+        function dateFormat(d){
+            var t = new Date(d);
+            return monthNames[t.getMonth()]+'-'+t.getFullYear();
+        }
+
+        function exportToExcel(tableID, filename = ''){
+            var downloadurl;
+            var dataFileType = 'application/vnd.ms-excel';
+            var tableSelect = document.getElementById(tableID);
+            var tableHTMLData = tableSelect.outerHTML.replace(/ /g, '%20');
+
+            // Specify file name
+            filename = filename?filename+'.xls':'export_excel_data.xls';
+
+            // Create download link element
+            downloadurl = document.createElement("a");
+
+            document.body.appendChild(downloadurl);
+
+            if(navigator.msSaveOrOpenBlob){
+                var blob = new Blob(['\ufeff', tableHTMLData], {
+                    type: dataFileType
+                });
+                navigator.msSaveOrOpenBlob( blob, filename);
+            }else{
+                // Create a link to the file
+                downloadurl.href = 'data:' + dataFileType + ', ' + tableHTMLData;
+
+                // Setting the file name
+                downloadurl.download = filename;
+
+                //triggering the function
+                downloadurl.click();
+            }
+        }
+
+
+
+
+
+
+        table = document.getElementById("table");
+
+
+
+
+        /*let newRow = table.insertRow(table.length);
+        let cell = newRow.insertCell(0);
+        cell.innerHTML = "Traffic(GB)";*/
+        for(let j = 1; j < month.length; j++) {
+            let cell = table.rows[0].insertCell(j);
+            cell.innerHTML = dateFormat(month[j]) ;
+        }
+        for(let j = 1; j < tot_eSUB.length; j++) {
+            let cell = table.rows[1].insertCell(j);
+            cell.innerHTML = tot_eSUB[j];
+        }
+    });
+
+  };
+
+
+
+
+
+
+
+</script>
+</body>

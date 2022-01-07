@@ -142,7 +142,7 @@
           let tempTotal = bigInt();
 
           for (i = 0; i < (totalindex); i++) {
-// ถ้าเจอ error บรรทัดนี้ เกิด จาก  มี row ใด row หนึ่งใน column data_volume ไม่ได้ ตั้งเป็น number store as text
+// ถ้าเจอ error บรรทัดนี้ เกิด จาก  มี row ใด row หนึ่งใน column data_volume ไม่เป็น number format as text ให้ใส่ ' ข้างหน้าตัวเลข
               tempTotal = tempTotal.add(bigInt(realdataTOT[i].data_volume.replace(' ', '').replace(/,/g, '').trim()));
           }
           console.log(tempTotal.toString());
