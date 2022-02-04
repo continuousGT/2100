@@ -1432,8 +1432,8 @@
 // TOT eSUB
                   summary_worksheet["I5"].v = vm_usage.eSUBtotSBN;
                   rep_TOT_worksheet["C5"].v = vm_usage.eSUBtotSBN;
-                  TOT_3_worksheet["D65"].v = vm_usage.eSUBtotSBN;
-                  AWN_2_20_worksheet["D69"].v = vm_usage.eSUBtotSBN;
+                  TOT_3_worksheet["D67"].v = vm_usage.eSUBtotSBN;
+                  AWN_2_20_worksheet["D71"].v = vm_usage.eSUBtotSBN;
 
                   summary_worksheet["J5"].v = vm_usage.eSUBtotSBN*TYPE1_RATE;
 
@@ -1472,7 +1472,7 @@
                   summary_worksheet["I7"].v = vm_usage.eSUBawn;  // total AWN eSUB
                   rep_TOT_worksheet["C7"].v = vm_usage.eSUBawn;  // total AWN eSUB
 
-                  TOT_3_worksheet["D66"].v = vm_usage.eSUBawn;
+                  TOT_3_worksheet["D68"].v = vm_usage.eSUBawn;
 
                   AWN_2_80_worksheet["D66"].v = vm_usage.eSUBawn;
 
@@ -1511,14 +1511,14 @@
                   rep_AWN_worksheet["D9"].v = summary_worksheet["E9"].v;
                   rep_AWN_worksheet["D11"].v = summary_worksheet["E11"].v;
 
-                  AWN_2_worksheet["D70"].v = rep_AWN_worksheet["D5"].v;
-                  AWN_2_worksheet["D72"].v = rep_AWN_worksheet["D7"].v;
-                  AWN_2_worksheet["D74"].v = rep_AWN_worksheet["D9"].v;
-                  AWN_2_worksheet["D76"].v = rep_AWN_worksheet["D11"].v;
+                  AWN_2_worksheet["D72"].v = rep_AWN_worksheet["D5"].v;
+                  AWN_2_worksheet["D74"].v = rep_AWN_worksheet["D7"].v;
+                  AWN_2_worksheet["D76"].v = rep_AWN_worksheet["D9"].v;
+                  AWN_2_worksheet["D78"].v = rep_AWN_worksheet["D11"].v;
 
-                  TOT_3_worksheet["D70"].v = rep_TOT_worksheet["D5"].v;
-                  TOT_3_worksheet["D72"].v = rep_TOT_worksheet["D7"].v;
-                  TOT_3_worksheet["D74"].v = rep_TOT_worksheet["D9"].v;
+                  TOT_3_worksheet["D72"].v = rep_TOT_worksheet["D5"].v;
+                  TOT_3_worksheet["D74"].v = rep_TOT_worksheet["D7"].v;
+                  TOT_3_worksheet["D76"].v = rep_TOT_worksheet["D9"].v;
 
 // report month
                   summary_worksheet["B2"].v = "ประจำเดือน"+reportMonth;
@@ -1595,18 +1595,18 @@
                   TOT_3_worksheet["D54"].s = TOT_3_worksheet["E54"].s;
                   TOT_3_worksheet["D55"].s = TOT_3_worksheet["E55"].s;
 
-                  TOT_3_worksheet["B60"].s = AWN_2_20_worksheet["B64"].s;  // เลื่อนลง 1 เลื่อนขึ้น 2 = เลื่อนขึ้น 1
-                  TOT_3_worksheet["C60"].s = AWN_2_20_worksheet["B64"].s;
+                  TOT_3_worksheet["B60"].s = AWN_2_80_worksheet["B59"].s;  // เลื่อนลง 1 เลื่อนขึ้น 2 = เลื่อนขึ้น 1
+                  TOT_3_worksheet["C60"].s = AWN_2_80_worksheet["C59"].s;
 
                   TOT_3_worksheet["B72"].s = rep_TOT_worksheet["B5"].s;
                   TOT_3_worksheet["B73"].s = rep_TOT_worksheet["B6"].s;
-                  TOT_3_worksheet["C71"].s = TOT_3_worksheet["B71"].s;
+                  TOT_3_worksheet["C73"].s = TOT_3_worksheet["B73"].s;
                   TOT_3_worksheet["B74"].s = rep_TOT_worksheet["B7"].s;
                   TOT_3_worksheet["B75"].s = rep_TOT_worksheet["B8"].s;
                   TOT_3_worksheet["D70"].s = rep_TOT_worksheet["D5"].s;
-                  TOT_3_worksheet["D72"].s = TOT_3_worksheet["B71"].s;
-                  TOT_3_worksheet["D73"].s = TOT_3_worksheet["D70"].s;
-                  TOT_3_worksheet["D74"].s = rep_TOT_worksheet["D8"].s;
+                  TOT_3_worksheet["D72"].s = TOT_3_worksheet["B72"].s;
+                  TOT_3_worksheet["D74"].s = rep_TOT_worksheet["D7"].s;
+                  TOT_3_worksheet["D75"].s = rep_TOT_worksheet["D8"].s;
 
                   AWN_2_worksheet["B50"].s = TOT_3_worksheet["B50"].s;
                   AWN_2_worksheet["D50"].s = TOT_3_worksheet["D50"].s;
@@ -1627,24 +1627,33 @@
                   AWN_2_worksheet["D67"].s = TOT_3_worksheet["D67"].s;
                   AWN_2_worksheet["D68"].s = TOT_3_worksheet["D68"].s;
                   AWN_2_worksheet["D69"].s = TOT_3_worksheet["D67"].s;
-                  AWN_2_worksheet["B70"].s = TOT_3_worksheet["B70"].s;
-                  AWN_2_worksheet["D69"].s = AWN_2_worksheet["B69"].s;
-                  AWN_2_worksheet["D70"].s = rep_AWN_worksheet["D5"].s;
-                  AWN_2_worksheet["B71"].s = TOT_3_worksheet["B71"].s;
-                  AWN_2_worksheet["D71"].s = TOT_3_worksheet["D71"].s;
-                  AWN_2_worksheet["D72"].s = TOT_3_worksheet["D72"].s;
+                  AWN_2_worksheet["B72"].s = TOT_3_worksheet["B72"].s;
+                  // AWN_2_worksheet["D69"].s = AWN_2_worksheet["B69"].s;
+
+                  TOT_3_worksheet["D73"].s = TOT_3_worksheet["B73"].s;
+                  AWN_2_worksheet["D72"].s = rep_AWN_worksheet["D5"].s;
                   AWN_2_worksheet["B73"].s = TOT_3_worksheet["B73"].s;
+                  AWN_2_worksheet["D73"].s = TOT_3_worksheet["D73"].s;
+                  AWN_2_worksheet["D72"].s = TOT_3_worksheet["D72"].s;
+                  AWN_2_worksheet["B75"].s = TOT_3_worksheet["B75"].s;
+                  AWN_2_worksheet["B71"].s = AWN_2_worksheet["B59"].s;
+                  AWN_2_worksheet["C71"].s = AWN_2_worksheet["B59"].s;
+                  AWN_2_worksheet["D71"].s = AWN_2_worksheet["B59"].s;
                   AWN_2_worksheet["D73"].s = TOT_3_worksheet["D73"].s;
                   AWN_2_worksheet["D74"].s = TOT_3_worksheet["D72"].s;
                   AWN_2_worksheet["D75"].s = TOT_3_worksheet["D73"].s;
+                  AWN_2_worksheet["D76"].s = TOT_3_worksheet["D72"].s;
+                  AWN_2_worksheet["D77"].s = TOT_3_worksheet["D73"].s;
 
                   AWN_2_20_worksheet["B55"].s = TOT_3_worksheet["B50"].s;
                   AWN_2_20_worksheet["B56"].s = TOT_3_worksheet["B51"].s;
                   AWN_2_20_worksheet["B57"].s = TOT_3_worksheet["B52"].s;
+                AWN_2_20_worksheet["B64"].s = TOT_3_worksheet["B60"].s;
+                AWN_2_20_worksheet["C64"].s = TOT_3_worksheet["C60"].s;
                   AWN_2_20_worksheet["D55"].s = TOT_3_worksheet["D50"].s;
                   AWN_2_20_worksheet["D56"].s = TOT_3_worksheet["D51"].s;
                   AWN_2_20_worksheet["D57"].s = TOT_3_worksheet["D52"].s;
-                  AWN_2_20_worksheet["D69"].s = TOT_3_worksheet["D67"].s;
+                  AWN_2_20_worksheet["D71"].s = TOT_3_worksheet["D67"].s;
 
                   AWN_2_80_worksheet["B50"].s = TOT_3_worksheet["B50"].s;
                   AWN_2_80_worksheet["B51"].s = TOT_3_worksheet["B51"].s;
