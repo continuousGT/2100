@@ -1480,18 +1480,18 @@
                       summary_worksheet["D5"].v = vm_usage.eSUBawn;
                       summary_worksheet["D7"].v = 10000000-vm_usage.eSUBawn;
                       rep_AWN_worksheet["C7"].v = 10000000-vm_usage.eSUBawn;
-                      AWN_2_worksheet["D66"].v = 10000000-vm_usage.eSUBawn;
+                      AWN_2_worksheet["D68"].v = 10000000-vm_usage.eSUBawn;
                   } else {
                       summary_worksheet["D5"].v = 10000000;
                       summary_worksheet["D7"].v = 0;
                       rep_AWN_worksheet["C7"].v = 0;
-                      AWN_2_worksheet["D66"].v = 0;
+                      AWN_2_worksheet["D68"].v = 0;
                       summary_worksheet["D9"].v = vm_usage.eSUBawn-10000000;
                       rep_AWN_worksheet["C9"].v = vm_usage.eSUBawn-10000000;
-                      AWN_2_worksheet["D67"].v = vm_usage.eSUBawn-10000000;
+                      AWN_2_worksheet["D69"].v = vm_usage.eSUBawn-10000000;
                   }
                   rep_AWN_worksheet["C5"].v = summary_worksheet["D5"].v;
-                  AWN_2_worksheet["D65"].v = summary_worksheet["D5"].v;
+                  AWN_2_worksheet["D67"].v = summary_worksheet["D5"].v;
 
                   summary_worksheet["E5"].v = calRoamCost(vm_usage.eSUBawn);
                   summary_worksheet["E7"].v = calPensionCost(vm_usage.eSUBawn);
