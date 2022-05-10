@@ -330,7 +330,7 @@
                   console.log("before :",rangeTOT);
                   rangeTOT.min = dc(refTOT.split(':')[0]);
                   rangeTOT.max = dc(refTOT.split(':')[1]);
-                  rangeTOT.max = {c:0,r:37};
+                  // cheat solve bug rangeTOT.max = {c:0,r:37};
                   console.log("after :",rangeTOT);
                   /* End Find range */
                   /* Find firstRow and define column of Table   */
@@ -387,7 +387,7 @@
                            data_volume:13};
                         firstRowTOT = 2;   before sep19 */
 
-                  /*  columnsTOT = {call_date: 0,
+                  columnsTOT = {call_date: 0,
                         voice_record: 1,
                         voice_duration: 2,
                         sms_transaction: 3,
@@ -397,22 +397,23 @@
                         data_4G_volume: 7,
                         data_record: 8,
                         data_volume: 9
-                    }; only oct19 */
+                    };
 
-                  columnsTOT = {call_date: 0,   // before NOV2019 and JAN2020
-                      voice_record: 1,
-                      voice_duration: 2,
-                      mt_record: 3,
-                      mt_duration: 4,
-                      sms_transaction: 5,
-                      sms_MT: 6,
-                      data_3G_record: 7,
-                      data_3G_volume: 8,
-                      data_4G_record: 9,
-                      data_4G_volume: 10,
-                      data_record: 11,
-                      data_volume: 12
-                  };
+
+/*                columnsTOT = {call_date: 0,   // before NOV2019 and JAN2020
+                  voice_record: 1,
+                  voice_duration: 2,
+                  mt_record: 3,
+                  mt_duration: 4,
+                  sms_transaction: 5,
+                  sms_MT: 6,
+                  data_3G_record: 7,
+                  data_3G_volume: 8,
+                  data_4G_record: 9,
+                  data_4G_volume: 10,
+                  data_record: 11,
+                  data_volume: 12
+                };*/
                   firstRowTOT = 4;
                   /*         columnsTOT = {call_date: 0,   // First Use DEC 2019
                                v_local_R: 1,
