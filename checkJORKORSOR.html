@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <style>
+    label {
+      cursor: pointer;
+      /* Style as you please, it will become the visible UI component. */
+    }
+
+    #xlf {
+      opacity: 0;
+      position: absolute;
+      z-index: -1;
+    }
+  </style>
+  <script src="dist/papaparse.js"></script>
+  <script src="dist/jquery-1.8.3.min.js"></script>
+  <script src="dist/foundation.min.js"></script>
+  <script src="dist/vue.js"></script>
+  <!--<script src="dist/vue2-filters.min.js"></script>-->
+  <!--<script src="https://cdn.jsdelivr.net/npm/vue2-filters/dist/vue2-filters.min.js"></script>-->
+  <!--<script src="http://peterolson.github.com/BigInteger.js/BigInteger.min.js"></script>-->
+  <script src="dist/BigInteger.min.js"></script>
+  <link rel="stylesheet" href="dist/foundation.min.css">
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/file-saver@2.0.2/dist/FileSaver.min.js"></script>
+  <!--<script src="dist/xlsx.full.min.js"></script>-->
+  <script src="dist/xlsx.stlye.min.js"> </script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.10/lodash.js"></script>
+  <script src="dist/moment-with-locales.js"></script>
+  <script>
+
+      var jsonAwn,jsonTot;
+
+      const dc = XLSX.utils.decode_cell,
+          ec = (r, c) => { return XLSX.utils.encode_cell({r: r, c: c}); };
+      var realdata = [];
+      var realdataTOT = [];
+      var usage_date,usage_dateTOT;
+      function findTable(sheet, range, colMap) {
+          let firstRow = null,
+              colsToFind = _.keys(colMap).length,
+
+              // colmap lowercase title -> prop
+              colLookup = _.reduce(colMap, (m, v, k) => { m[_.isString(v)? v.toLowerCase() : v] = k; return m; }, {}),
+
+              // colmap props -> 0-indexed column
+              columns = _.reduce(colMap, (m, v, k) => { m[k] = null; return m; }, {});
+
+          // Look for header row and extract columns
+          for(let r = range.min.r; r <= range.max.r - 1; ++r) {
+              let colsFound = 0;
+
+              for(let c = range.min.c; c <= range.max.c; ++c) {
+                  let cell = sheet[ec(r, c)];
+
+                  if(cell && cell.v !== undefined) {
+                      let prop = colLookup[cell.t === 's'? cell.v.toLowerCase() : cell.v];
+                      if(prop) {
+                          columns[prop] = c;
+                          ++colsFound;
+                      }
+                  }
+              }
+
+              if(colsFound === colsToFind) {
+                  firstRow = r + 1;
+                  break;
+              }
+          }
+
+          return { columns, firstRow };
+      }
+      function readTable(sheet, range, columns, firstRow, stop) {
+          let data = [];
+
+          for(let r = firstRow; r <= range.max.r; ++r) {
+              let row = _.reduce(columns, (m, c, k) => {
+                  let cell = sheet[ec(r, c)];
+                  // m[k] = cell? cell.v : null;
+                  if (moment(cell.w, 'DD/MM/YYYY',true).isValid()){
+                      m[k] = cell? cell.w.trim() : null;
+                  } else {
+                      m[k] = cell? cell.v : null;
+                  }
+
+                  return m;
+              }, {});
+
+              if(stop && stop(row)) {
+                  break;
+              }
+
+              data.push(row);
+          }
+
+          return data;
+      }
+
+
+      function setMonthUsage(jsonObj,month, newVoice,newSMS,newData) {
+          /*      for (var i=0; i<jsonObj.data.length; i++) {
+                  if (jsonObj.data[i].month === month) {
+                    jsonObj.data[i].voice = newVoice;
+                    jsonObj.data[i].sms = newSMS;
+                    jsonObj.data[i].data = newData;
+                    console.log("Updated :",jsonObj);
+                    return;
+                  }
+                }*/
+      }
+
+      function checkSUMofData(totalindex){
+
+          let tempTotal = bigInt();
+
+          for (i = 0; i < (totalindex); i++) {
+
+              tempTotal = tempTotal.add(bigInt(realdata[i].data_volume.replace(' ', '').replace(/,/g, '').trim()));
+          }
+          console.log(tempTotal.toString());
+          let csvTotal = bigInt(realdata[totalindex].data_volume.replace(' ', '').replace(/,/g, '').trim());
+
+          console.log(csvTotal.toString());
+
+          if (tempTotal.equals(csvTotal)) {
+              console.log('SUM correct');
+          }
+          else
+              console.log('SUM error');
+          /*      vm_checkCSV.dataJS = tempTotal.toString();
+                vm_checkCSV.dataEXCEL = csvTotal.toString();
+                vm_checkCSV.dataDIFF = tempTotal.minus(csvTotal).toString();*/
+          let tempTotalStr = tempTotal.toString(),
+              csvTotalStr =  csvTotal.toString(),
+              diffStr = tempTotal.minus(csvTotal).toString();
+          return [tempTotalStr, csvTotalStr, diffStr]
+      }
+      function checkSUMofDataTOT(totalindex){
+
+          let tempTotal = bigInt();
+
+          for (i = 0; i < (totalindex); i++) {
+// ถ้าเจอ error บรรทัดนี้ เกิด จาก  มี row ใด row หนึ่งใน column data_volume ไม่เป็น number format as text ให้ใส่ ' ข้างหน้าตัวเลข
+              tempTotal = tempTotal.add(bigInt(realdataTOT[i].data_volume.replace(' ', '').replace(/,/g, '').trim()));
+          }
+          console.log(tempTotal.toString());
+          let csvTotal = bigInt(realdataTOT[totalindex].data_volume.replace(' ', '').replace(/,/g, '').trim());
+
+          console.log(csvTotal.toString());
+
+          if (tempTotal.equals(csvTotal)) {
+              console.log('SUM correct');
+          }
+          else
+              console.log('SUM error');
+          /*      vm_checkCSV.dataJS = tempTotal.toString();
+                vm_checkCSV.dataEXCEL = csvTotal.toString();
+                vm_checkCSV.dataDIFF = tempTotal.minus(csvTotal).toString();*/
+          let tempTotalStr = tempTotal.toString(),
+              csvTotalStr =  csvTotal.toString(),
+              diffStr = tempTotal.minus(csvTotal).toString();
+          return [tempTotalStr, csvTotalStr, diffStr]
+      }
+      function checkSUMofVoice(arry,totalindex){
+
+          let tempTotal = bigInt();
+
+          for (i = 0; i < (totalindex); i++) {
+
+              tempTotal = tempTotal.add(bigInt(arry[i].voice_duration));
+          }
+          console.log(tempTotal.toString());
+          let csvTotal = bigInt(arry[totalindex].voice_duration);
+
+          console.log(csvTotal.toString());
+          if (tempTotal.equals(csvTotal)) {
+              console.log('SUM of Voice correct');
+          }
+          else
+              console.log('SUM of Voice error');
+
+          let tempTotalStr = tempTotal.toString(),
+              csvTotalStr =  csvTotal.toString(),
+              diffStr = tempTotal.minus(csvTotal).toString();
+          return [tempTotalStr, csvTotalStr, diffStr]
+      }
+
+      function checkSUMofSMS(arry,totalindex){
+
+          let tempTotal = bigInt();
+
+          for (i = 0; i < (totalindex); i++) {
+
+              tempTotal = tempTotal.add(bigInt(arry[i].sms_transaction));
+          }
+          console.log(tempTotal.toString());
+          let csvTotal = bigInt(arry[totalindex].sms_transaction);
+
+          console.log(csvTotal.toString());
+          if (tempTotal.equals(csvTotal)) {
+              console.log('SUM of SMS correct');
+          }
+          else
+              console.log('SUM of SMS error');
+
+          let tempTotalStr = tempTotal.toString(),
+              csvTotalStr =  csvTotal.toString(),
+              diffStr = tempTotal.minus(csvTotal).toString();
+          return [tempTotalStr, csvTotalStr, diffStr]
+      }
+
+      function handleTextSelect(e) {
+          const TOT_SHEET = 0;
+          const AWN_SHEET = 1;
+          let rangeAWN = {min: {r: 2, c: 0}, max: {r: 63, c:16}};
+          let rangeTOT = {min: {r: 2, c: 0}, max: {r: 63, c:16}};
+          let files = e.target.files;
+          let i,f;
+          for (i = 0, f = files[i]; i != files.length; ++i) {
+              let reader = new FileReader();
+              let name = f.name;
+              reader.onload = function(e) {
+                  let data = e.target.result;
+
+                  let workbook2 = XLSX.read(data, {type: 'binary',cellDates:true});
+                  console.log(workbook2);
+                  /*  BEGIN WORK WITH  AWN USAGE */
+                  let awn_sheet_name = workbook2.SheetNames[AWN_SHEET];
+                  console.log(awn_sheet_name);
+
+                  /* Get AWN worksheet */
+                  let awn_worksheet = workbook2.Sheets[awn_sheet_name];
+                  /* Find range */
+                  let ref = awn_worksheet['!ref'];
+                  console.log("ref :",ref);
+                  if(awn_worksheet === null) {
+                      console.log("Second Sheet is NULL");
+                  } else {
+                      console.log("Second Sheet : ",awn_worksheet);
+                  }
+                  if(!ref && ref.indexOf(':') === -1) {
+                      throw new Error("Malformed workbook - no !ref property");
+                  }
+                  console.log("before :",rangeAWN);
+                  ref = "A1:F35";
+                  rangeAWN.min = dc(ref.split(':')[0]);
+                  rangeAWN.max = dc(ref.split(':')[1]);
+                  console.log("after :",rangeAWN);
+                  /* End Find range */
+                  /* Find firstRow and define column of Table   */
+                  /*          let { columns, firstRow } = findTable(awn_worksheet, rangeAWN, {
+                              call_date: "Call Date",
+                              voice_record: "Total Record",
+                              voice_duration: "Total Duration (sec.)",
+                              sms_transaction: "Total Transaction",
+                              data_record: "Total Record",
+                              data_volume: "Total Volume (Byte)"
+                            });*/
+                  let { columns, firstRow } = findTable(awn_worksheet, rangeAWN, {
+                      call_date: 0,
+                      voice_record: 1,
+                      voice_duration: 2,
+                      sms_transaction: 3,
+                      data_record: 4,
+                      data_volume: 5
+                  });
+                  console.log("column is ",columns);
+                  if (columns.call_date === null) {
+                      columns = {call_date: 0,
+                        voice_record: 1,
+                        voice_duration: 2,
+                        sms_transaction: 3,
+                        data_record: 4,
+                        data_volume: 5
+                      }
+                  }
+                  if(firstRow === null) {
+                      console.log("First Row is NULL");
+                      //firstRow = awn_worksheet['!merges'][0].e.r+1;
+                      console.log(" First Row is 3 ");
+                      console.log("First Row is",firstRow);
+                      firstRow = 3;
+                  } else {
+                      console.log("First Row : ",firstRow);
+                  }
+                  /* END Find firstRow and define column of Table   */
+                  /* READ DATA  */
+                  const awndata = readTable(awn_worksheet, rangeAWN, columns, firstRow, (row) => false);
+                  console.log(awndata);
+                  var tempEAK = awndata.filter((member) => {
+                      return member.data_record !== ""
+                  });
+                  realdata = awndata.filter((member) => {
+                      return member.data_record !== null
+                  });
+                  console.log(realdata[realdata.length-1]);
+                  usage_date = formatDateAWN(realdata[10].call_date);
+                  console.log("Date is ",usage_date);
+                  [vm_checkCSV.dataJS,vm_checkCSV.dataEXCEL,vm_checkCSV.dataDIFF] = checkSUMofData(realdata.length-1);
+                  [vm_checkCSV.smsJS, vm_checkCSV.smsEXCEL, vm_checkCSV.smsDIFF] = checkSUMofSMS(realdata,realdata.length-1);
+                  [vm_checkCSV.voiceJS, vm_checkCSV.voiceEXCEL, vm_checkCSV.voiceDIFF] = checkSUMofVoice(realdata,realdata.length-1);
+                  /*  END WORK WITH  AWN USAGE */
+
+
+                  /*  BEGIN WORK WITH  TOT USAGE */
+                  let tot_sheet_name = workbook2.SheetNames[TOT_SHEET];
+                  /* Get TOT worksheet */
+                  let tot_worksheet = workbook2.Sheets[tot_sheet_name];
+                  /* Find range */
+                  let refTOT = tot_worksheet['!ref'];
+                  console.log("ref :",refTOT);
+                  if(tot_worksheet === null) {
+                      console.log("First Sheet is NULL");
+                  } else {
+                      console.log("First Sheet : ",tot_worksheet);
+                  }
+                  if(!refTOT && refTOT.indexOf(':') === -1) {
+                      throw new Error("Malformed workbook - no !ref property");
+                  }
+                  console.log("First Sheet : ",tot_worksheet);
+                  console.log("before :",rangeTOT);
+                  rangeTOT.min = dc(refTOT.split(':')[0]);
+                  rangeTOT.max = dc(refTOT.split(':')[1]);
+                  // cheat solve bug rangeTOT.max = {c:0,r:37};
+                  console.log("after :",rangeTOT);
+                  /* End Find range */
+                  /* Find firstRow and define column of Table   */
+
+
+
+                  /*          let { columnsTOT, firstRowTOT } = findTable(tot_worksheet, rangeTOT, {
+                              file_date: "FILE_DATE",
+                              call_date: "CALL_DATE",
+                                voice_record: "TOTAL MOC - RECORD",
+                                voice_duration: "TOTAL MOC - DURATION(SEC.)",
+                              local_record: "MTC - RECORD",
+                              local_duration: "MTC - DURATION(SEC.)",
+                              sms_transaction: "SMS MO - TRANSACTION",
+                              sms_mt_trans: "SMS MT - TRANSACTION",
+                              data_record: "DATA 3G - RECORD",
+                              data_volume: "DATA 3G - VOLUME(BYTE)"
+                    file_date: 0,
+                    call_date: 1,
+                    voice_record: 2,
+                    voice_duration: 3,
+                    local_record: 4,
+                    local_duration: 5,
+                    sms_transaction: 6,
+                    sms_mt_trans: 7,
+                    data3G_record: 8,
+                    data3G_volume: 9,
+                    data4G_record: 10,
+                    data4G_volume: 11,
+                    data_record:12,
+                    data_volume:13
+                });
+                console.log("column is ",columnsTOT);
+                  if(firstRowTOT === null) {
+                      console.log("First Row is NULL");
+                      firstRowTOT = 2;
+                  }
+                  */
+                  /*
+                       columnsTOT = {
+                          file_date: 0,
+                          call_date: 1,
+                            voice_record: 2,
+                            voice_duration: 3,
+                           local_record: 4,
+                           local_duration: 5,
+                           sms_transaction: 6,
+                           sms_mt_trans: 7,
+                           data3G_record: 8,
+                           data3G_volume: 9,
+                           data4G_record: 10,
+                           data4G_volume: 11,
+                           data_record:12,
+                           data_volume:13};
+                        firstRowTOT = 2;   before sep19 */
+
+ /*                 columnsTOT = {call_date: 0,
+                        voice_record: 1,
+                        voice_duration: 2,
+                        sms_transaction: 3,
+                        data_3G_record: 4,
+                        data_3G_volume: 5,
+                        data_4G_record: 6,
+                        data_4G_volume: 7,
+                        data_record: 8,
+                        data_volume: 9
+                    };*/
+
+
+                columnsTOT = {call_date: 0,
+                  voice_record: 1,
+                  voice_duration: 2,
+                  sms_transaction: 3,
+                  data_record: 4,
+                  data_volume: 5
+                };
+                  firstRowTOT = 3;
+                  /*         columnsTOT = {call_date: 0,   // First Use DEC 2019
+                               v_local_R: 1,
+                               v_local_D: 2,
+                               v_idd_r:3,
+                               v_idd_d:4,
+                               v_video_r:5,
+                               v_video_d:6,
+                               voice_record: 7,
+                               voice_duration: 8,
+                               mt_record: 9,
+                               mt_duration: 10,
+                               sms_transaction: 11,
+                               sms_MT: 12,
+                               data_3G_record: 13,
+                               data_3G_volume: 14,
+                               data_4G_record: 15,
+                               data_4G_volume: 16,
+                               data_record: 17,
+                               data_volume: 18
+                           };
+                           firstRowTOT = 4; // use for DEC */
+
+                  /* END Find firstRow and define column of Table   */
+                  /* READ DATA  */
+                  const totdata = readTable(tot_worksheet, rangeTOT, columnsTOT, firstRowTOT, (row) => false);
+                  console.log(totdata);
+                  var tempOzone  = totdata.filter((member) => {
+                      return member.data_record !== ""
+                  });
+
+                  realdataTOT = tempOzone.filter((member) => {
+                      return member.data_record !== null
+                  });
+
+                  console.log(realdataTOT[realdataTOT.length-1]);
+                  usage_dateTOT = formatDate(realdataTOT[10].call_date);
+                  console.log("Date is ",usage_dateTOT);
+                  [vm_checkTOT.dataJS,vm_checkTOT.dataEXCEL,vm_checkTOT.dataDIFF] = checkSUMofDataTOT(realdataTOT.length-1);
+                  [vm_checkTOT.smsJS, vm_checkTOT.smsEXCEL, vm_checkTOT.smsDIFF] = checkSUMofSMS(realdataTOT,realdataTOT.length-1);
+                  [vm_checkTOT.voiceJS, vm_checkTOT.voiceEXCEL, vm_checkTOT.voiceDIFF]= checkSUMofVoice(realdataTOT,realdataTOT.length-1);
+                  /*  END WORK WITH  TOT USAGE */
+
+              };
+              reader.readAsBinaryString(f);
+          }
+
+      }
+      /* function formatDate(date) {
+
+         let d = new Date(date),
+           month = '' + (d.getMonth() + 1),
+           day = '' + d.getDate(),
+           year = d.getFullYear();
+
+         if (month.length < 2) month = '0' + month;
+         if (day.length < 2) day = '0' + day;
+
+         return [year, month, day].join('-');
+       } */
+      function formatDate(input_date) {
+          let d = moment(input_date, "DD/MM/YYYY");
+          return d.format('YYYY-MM-DD');
+      }
+
+      /*    function formatDateAWN(date) {
+
+
+            return date.replace( /(\d{2})\/(\d{2})\/(\d{4})/, "$3-$2-$1") ;
+          }*/
+      /*    function formatDateAWN(input_date){
+            let myDate = new Date(input_date);
+            //document.write(myDate + " ----------- ")
+            let myDay = myDate.getDate();
+            //document.write("Day: " + myDay + "| ");
+            let myMonth = myDate.getMonth() + 1;
+            //document.write("Month: " + myMonth + "  ::::  ");
+            myDay = (myDay < 10) ? ("0" + myDay) : myDay;
+            myMonth = (myMonth < 10) ? ("0" + myMonth) : myMonth;
+            return myDate.getFullYear() + "-" + myMonth + "-" + myDay;
+          }*/
+      function formatDateAWN(input_date){
+          let d = moment(input_date, "DD/MM/YYYY");
+          return d.format('YYYY-MM-DD');
+      }
+      function downloadAWNcsv(args) {
+          let data, filename, link;
+
+          //setMonthUsage(jsonAwn,tempDateStr,voiceSEC_Total.toString(),sms_Total.toString(),data_Total.toString());     //  ทำปุ่ม update usage file แล้วย้ายอันนี้ไปไว้ โดยเอาค่า calldate[awnal_day-1].split("/").reverse().join("-")
+          const test = {
+              month: usage_date,
+              voice: realdata[realdata.length-1].voice_duration,
+              sms: realdata[realdata.length-1].sms_transaction,
+              data: realdata[realdata.length-1].data_volume};
+          jsonAwn.data.push(test);
+          console.log("After add : ",jsonAwn);
+          let csv = Papa.unparse(jsonAwn);
+          if (csv == null) return;
+
+          filename = args.filename || 'export.csv';
+
+          if (!csv.match(/^data:text\/csv/i)) {
+              csv = 'data:text/csv;charset=utf-8,' + csv;
+          }
+          data = encodeURI(csv);
+
+          link = document.createElement('a');
+          link.setAttribute('href', data);
+          link.setAttribute('download', filename);
+          link.click();
+      }
+      function downloadTOTcsv(args) {
+          let data, filename, link;
+
+          //setMonthUsage(jsonTot,tempDateStr,voiceSEC_Total.toString(),sms_Total.toString(),data_Total.toString());     //  ทำปุ่ม update usage file แล้วย้ายอันนี้ไปไว้ โดยเอาค่า calldate[awnal_day-1].split("/").reverse().join("-")
+          const test = {
+              month: usage_dateTOT,
+              voice: realdataTOT[realdataTOT.length-1].voice_duration,
+              sms: realdataTOT[realdataTOT.length-1].sms_transaction,
+              data: realdataTOT[realdataTOT.length-1].data_volume};
+          jsonTot.data.push(test);
+          console.log("After add : ",jsonTot);
+          let csv = Papa.unparse(jsonTot);
+          if (csv == null) return;
+
+          filename = args.filename || 'export.csv';
+
+          if (!csv.match(/^data:text\/csv/i)) {
+              csv = 'data:text/csv;charset=utf-8,' + csv;
+          }
+          data = encodeURI(csv);
+
+          link = document.createElement('a');
+          link.setAttribute('href', data);
+          link.setAttribute('download', filename);
+          link.click();
+      }
+      function handleFile(e) {
+
+          console.log('in handle file');
+          var files = e.target.files;
+          var i,f;
+          for (i = 0, f = files[i]; i != files.length; ++i) {
+              var reader = new FileReader();
+              var name = f.name;
+              reader.onload = function(e) {
+                  var data = e.target.result;
+//  ลอง เปลี่ยน raw = true แก้ สีดำ ได้ไหม
+                  var workbook = XLSX.read(data, {type: 'binary',cellDates:true,cellStyles:true,cellNF:true});
+                  console.log(workbook);
+                  var sum_sheetName = workbook.SheetNames[0];
+                  var summary_worksheet = workbook.Sheets[sum_sheetName];
+                  var rep_TOT_worksheet = workbook.Sheets[workbook.SheetNames[1]];
+                  var rep_AWN_worksheet = workbook.Sheets[workbook.SheetNames[4]];
+                  var TOT_2_worksheet = workbook.Sheets[workbook.SheetNames[2]];
+                  var TOT_3_worksheet = workbook.Sheets[workbook.SheetNames[3]];
+                  var AWN_2_worksheet = workbook.Sheets[workbook.SheetNames[5]];
+                  var AWN_2_20_worksheet = workbook.Sheets[workbook.SheetNames[6]];
+                  var AWN_3_80_worksheet = workbook.Sheets[workbook.SheetNames[7]];
+
+// ใส่ค่า tot cdr detail ลงใน template TOT2 และ AWN_2_20
+                  const startRow = 7;
+                  const totalRowTOT=46;
+                  const callDateCol = 'B'; // column ของ template รายงาน ไม่ใช่ column ของ excelจาก AWN นะ
+                  const vRecordCol = 'C', vDuraCol = 'D', smsTransCol = 'E', dataRecCol ='F',dataVolCol ='G';
+
+                  for (j=0; j < (realdataTOT.length-1); ++j){
+                      TOT_2_worksheet[callDateCol + (startRow+j).toString()].v = realdataTOT[j].call_date ;
+                      AWN_2_20_worksheet[callDateCol + (startRow+j).toString()].v = realdataTOT[j].call_date;
+                      TOT_2_worksheet[vRecordCol + (startRow+j).toString()].v = realdataTOT[j].voice_record;
+                      AWN_2_20_worksheet[vRecordCol + (startRow+j).toString()].v = realdataTOT[j].voice_record;
+                      TOT_2_worksheet[vDuraCol + (startRow+j).toString()].v = realdataTOT[j].voice_duration;
+                      AWN_2_20_worksheet[vDuraCol + (startRow+j).toString()].v = realdataTOT[j].voice_duration;
+                      TOT_2_worksheet[smsTransCol + (startRow+j).toString()].v = realdataTOT[j].sms_transaction;
+                      AWN_2_20_worksheet[smsTransCol + (startRow+j).toString()].v = realdataTOT[j].sms_transaction;
+                      TOT_2_worksheet[dataRecCol + (startRow+j).toString()].v = realdataTOT[j].data_record;
+                      AWN_2_20_worksheet[dataRecCol + (startRow+j).toString()].v = realdataTOT[j].data_record;
+                      TOT_2_worksheet[dataVolCol + (startRow+j).toString()].v = realdataTOT[j].data_volume;
+                      AWN_2_20_worksheet[dataVolCol + (startRow+j).toString()].v = realdataTOT[j].data_volume;
+                  }
+                  //  ใส่ค่า TOT total ลงใน template TOT_2 AWN_2_20
+                  TOT_2_worksheet[vRecordCol + (totalRowTOT).toString()].v = realdataTOT[realdataTOT.length-1].voice_record;
+                  AWN_2_20_worksheet[vRecordCol + (totalRowTOT).toString()].v = realdataTOT[realdataTOT.length-1].voice_record;
+                  TOT_2_worksheet[vDuraCol + (totalRowTOT).toString()].v = realdataTOT[realdataTOT.length-1].voice_duration;
+                  AWN_2_20_worksheet[vDuraCol + (totalRowTOT).toString()].v = realdataTOT[realdataTOT.length-1].voice_duration;
+                  TOT_2_worksheet[smsTransCol + (totalRowTOT).toString()].v = realdataTOT[realdataTOT.length-1].sms_transaction;
+                  AWN_2_20_worksheet[smsTransCol + (totalRowTOT).toString()].v = realdataTOT[realdataTOT.length-1].sms_transaction;
+                  TOT_2_worksheet[dataRecCol + (totalRowTOT).toString()].v = realdataTOT[realdataTOT.length-1].data_record;
+                  AWN_2_20_worksheet[dataRecCol + (totalRowTOT).toString()].v = realdataTOT[realdataTOT.length-1].data_record;
+                  TOT_2_worksheet[dataVolCol + (totalRowTOT).toString()].v = realdataTOT[realdataTOT.length-1].data_volume;
+                  AWN_2_20_worksheet[dataVolCol + (totalRowTOT).toString()].v = realdataTOT[realdataTOT.length-1].data_volume;
+
+// ใส่ค่า AWN cdr detail ลงใน template TOT_3 AWN_2 และ AWN_3_80
+
+                  const totalRow = 42;
+
+                  for (j=0; j < (realdata.length-1); ++j){
+                      TOT_3_worksheet[callDateCol + (startRow+j).toString()].v = realdata[j].call_date;
+                      AWN_2_worksheet[callDateCol + (startRow+j).toString()].v = realdata[j].call_date;
+                      AWN_3_80_worksheet[callDateCol + (startRow+j).toString()].v = realdata[j].call_date;
+                      TOT_3_worksheet[vRecordCol + (startRow+j).toString()].v = realdata[j].voice_record;
+                      AWN_2_worksheet[vRecordCol + (startRow+j).toString()].v = realdata[j].voice_record;
+                      AWN_3_80_worksheet[vRecordCol + (startRow+j).toString()].v = realdata[j].voice_record;
+                      TOT_3_worksheet[vDuraCol + (startRow+j).toString()].v = realdata[j].voice_duration;
+                      AWN_2_worksheet[vDuraCol + (startRow+j).toString()].v = realdata[j].voice_duration;
+                      AWN_3_80_worksheet[vDuraCol + (startRow+j).toString()].v = realdata[j].voice_duration;
+                      TOT_3_worksheet[smsTransCol + (startRow+j).toString()].v = realdata[j].sms_transaction;
+                      AWN_2_worksheet[smsTransCol + (startRow+j).toString()].v = realdata[j].sms_transaction;
+                      AWN_3_80_worksheet[smsTransCol + (startRow+j).toString()].v = realdata[j].sms_transaction;
+                      TOT_3_worksheet[dataRecCol + (startRow+j).toString()].v = realdata[j].data_record;
+                      AWN_2_worksheet[dataRecCol + (startRow+j).toString()].v = realdata[j].data_record;
+                      AWN_3_80_worksheet[dataRecCol + (startRow+j).toString()].v = realdata[j].data_record;
+                      TOT_3_worksheet[dataVolCol + (startRow+j).toString()].v = realdata[j].data_volume;
+                      AWN_2_worksheet[dataVolCol + (startRow+j).toString()].v = realdata[j].data_volume;
+                      AWN_3_80_worksheet[dataVolCol + (startRow+j).toString()].v = realdata[j].data_volume;
+                  }
+                  //  ใส่ค่า AWN total ลงใน template
+                  TOT_3_worksheet[vRecordCol + (totalRow).toString()].v = realdata[realdata.length-1].voice_record;
+                  AWN_2_worksheet[vRecordCol + (totalRow).toString()].v = realdata[realdata.length-1].voice_record;
+                  AWN_3_80_worksheet[vRecordCol + (totalRow).toString()].v = realdata[realdata.length-1].voice_record;
+                  TOT_3_worksheet[vDuraCol + (totalRow).toString()].v = realdata[realdata.length-1].voice_duration;
+                  AWN_2_worksheet[vDuraCol + (totalRow).toString()].v = realdata[realdata.length-1].voice_duration;
+                  AWN_3_80_worksheet[vDuraCol + (totalRow).toString()].v = realdata[realdata.length-1].voice_duration;
+                  TOT_3_worksheet[smsTransCol + (totalRow).toString()].v = realdata[realdata.length-1].sms_transaction;
+                  AWN_2_worksheet[smsTransCol + (totalRow).toString()].v = realdata[realdata.length-1].sms_transaction;
+                  AWN_3_80_worksheet[smsTransCol + (totalRow).toString()].v = realdata[realdata.length-1].sms_transaction;
+                  TOT_3_worksheet[dataRecCol + (totalRow).toString()].v = realdata[realdata.length-1].data_record;
+                  AWN_2_worksheet[dataRecCol + (totalRow).toString()].v = realdata[realdata.length-1].data_record;
+                  AWN_3_80_worksheet[dataRecCol + (totalRow).toString()].v = realdata[realdata.length-1].data_record;
+                  TOT_3_worksheet[dataVolCol + (totalRow).toString()].v = realdata[realdata.length-1].data_volume;
+                  AWN_2_worksheet[dataVolCol + (totalRow).toString()].v = realdata[realdata.length-1].data_volume;
+                  AWN_3_80_worksheet[dataVolCol + (totalRow).toString()].v = realdata[realdata.length-1].data_volume;
+
+// correct black cell of summary_worksheet
+                  summary_worksheet["E5"].s = summary_worksheet["D5"].s;
+                  summary_worksheet["E6"].s = summary_worksheet["D6"].s;
+                  summary_worksheet["E7"].s = summary_worksheet["D7"].s;
+                  summary_worksheet["E8"].s = summary_worksheet["D8"].s;
+                  summary_worksheet["E9"].s = summary_worksheet["D9"].s;
+                  summary_worksheet["G5"].s = summary_worksheet["B5"].s;
+                  summary_worksheet["G6"].s = summary_worksheet["B6"].s;
+                  summary_worksheet["G7"].s = summary_worksheet["B7"].s;
+                  summary_worksheet["G8"].s = summary_worksheet["B8"].s;
+                  summary_worksheet["G9"].s = summary_worksheet["B9"].s;
+                  summary_worksheet["G10"].s = summary_worksheet["B10"].s;
+                  summary_worksheet["I5"].s = summary_worksheet["D5"].s;
+                  summary_worksheet["I6"].s = summary_worksheet["D6"].s;
+                  summary_worksheet["I7"].s = summary_worksheet["D7"].s;
+                  summary_worksheet["I8"].s = summary_worksheet["D8"].s;
+                  summary_worksheet["I9"].s = summary_worksheet["D9"].s;
+                  summary_worksheet["I10"].s = summary_worksheet["D10"].s;
+                  summary_worksheet["J5"].s = summary_worksheet["D5"].s;
+                  summary_worksheet["J6"].s = summary_worksheet["D6"].s;
+                  summary_worksheet["J7"].s = summary_worksheet["D7"].s;
+                  summary_worksheet["J8"].s = summary_worksheet["D8"].s;
+                  summary_worksheet["J9"].s = summary_worksheet["D9"].s;
+                  summary_worksheet["J10"].s = summary_worksheet["D10"].s;
+
+                  rep_TOT_worksheet["B5"].s = summary_worksheet["B5"].s;
+                  rep_TOT_worksheet["B6"].s = summary_worksheet["B6"].s;
+                  rep_TOT_worksheet["B7"].s = summary_worksheet["B7"].s;
+                  rep_TOT_worksheet["B8"].s = summary_worksheet["B8"].s;
+                  rep_TOT_worksheet["C5"].s = summary_worksheet["C5"].s;
+                  rep_TOT_worksheet["C7"].s = summary_worksheet["C7"].s;
+                  rep_TOT_worksheet["C8"].s = summary_worksheet["C8"].s;
+                  rep_TOT_worksheet["D5"].s = summary_worksheet["D5"].s;
+                  rep_TOT_worksheet["D6"].s = summary_worksheet["D6"].s;
+                  rep_TOT_worksheet["D7"].s = summary_worksheet["D7"].s;
+                  rep_TOT_worksheet["D8"].s = summary_worksheet["D8"].s;
+                  rep_TOT_worksheet["!ref"] = "B1:E21";
+
+                  rep_AWN_worksheet["C5"].s = summary_worksheet["C5"].s;
+                  rep_AWN_worksheet["D5"].s = summary_worksheet["D5"].s;
+                  rep_AWN_worksheet["B6"].s = summary_worksheet["B6"].s;
+                  rep_AWN_worksheet["C6"].s = summary_worksheet["C6"].s;
+                  rep_AWN_worksheet["D6"].s = summary_worksheet["D6"].s;
+                  rep_AWN_worksheet["C7"].s = summary_worksheet["C7"].s;
+                  rep_AWN_worksheet["D7"].s = summary_worksheet["D7"].s
+                  rep_AWN_worksheet["B8"].s = summary_worksheet["B8"].s;
+                  rep_AWN_worksheet["C8"].s = summary_worksheet["C8"].s;
+                  rep_AWN_worksheet["D8"].s = summary_worksheet["D8"].s;
+                  rep_AWN_worksheet["D10"].s = rep_AWN_worksheet["C10"].s;
+                  rep_AWN_worksheet["B12"].s = summary_worksheet["B13"].s;
+                  rep_AWN_worksheet["C12"].s = summary_worksheet["B13"].s;
+                  rep_AWN_worksheet["D12"].s = summary_worksheet["B13"].s;
+                  rep_AWN_worksheet["!ref"] = "B1:D23";
+                  rep_AWN_worksheet["!cols"] = rep_TOT_worksheet["!cols"];
+// correct rown hieght
+                  var rowsH = [
+                      {hpx:27},{hpx:21},{hpx:21},{hpx:21},{hpx:51},
+                      {hpx:21},{hpx:21},{hpx:21},{hpx:21},{hpx:21},{hpx:21},{hpx:21},{hpx:21},
+                      {hpx:21},{hpx:21},{hpx:21},{hpx:21},{hpx:21},{hpx:21},{hpx:21},{hpx:21},
+                      {hpx:21},{hpx:21}
+                  ];
+
+
+                  summary_worksheet['!rows']=rowsH;
+// Save  workbook
+                  /* bookType can be 'xlsx' or 'xlsm' or 'xlsb' */
+                  var wopts = { bookType:'xlsx', bookSST:false, type:'binary' };
+
+                  var wbout = XLSX.write(workbook,wopts);
+
+                  function s2ab(s) {
+                      var buf = new ArrayBuffer(s.length);
+                      var view = new Uint8Array(buf);
+                      for (var i=0; i!=s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
+                      return buf;
+                  }
+
+                  /* the saveAs call downloads a file on the local machine */
+                  saveAs(new Blob([s2ab(wbout)],{type:""}), "test.xlsx")
+
+
+
+              };
+              reader.readAsBinaryString(f);
+          }
+      }
+      try {
+          if (typeof Vue === 'object') {
+              console.log('Vue load');
+          }
+          Vue.filter('totNumber', function (value) {
+              return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+          });
+      }catch (e)  {
+          console.log(e);
+      }
+      $(document).ready(function(){
+          $(document).foundation();
+          var xlf = document.getElementById('xlf');
+          xlf.addEventListener('change', handleFile, false);
+          $("#txt-file").change(handleTextSelect);
+          //var awnfile = "https://https://continuousgt.github.io/2100/dist/awn_usage2018.csv";
+          let awnfile = "dist/awn_usage2018.csv";
+          let totfile = "dist/tot_usage2018.csv";
+          //  copy papa ทำกับ awn เหมือนกัน โดยให้ อันล่าง เป็น tot  อ่านของ Awn ก่อน แต่ ไม่ต้อง เรียก chart และ month ด้วย
+          Papa.parse(awnfile, {
+              download: true,
+              header: true,
+              dynamicTyping: true,
+              skipEmptyLines: true,
+              complete: function(results) {
+
+                  //console.log("Complete : ",results);
+                  //console.log("month : " ,results.data[0].month);
+                  jsonAwn = results;
+                  console.log("Complete : ",jsonAwn);
+                  console.log("month : " ,jsonAwn.data[0].month);
+
+              }
+
+          });
+          Papa.parse(totfile, {
+              download: true,
+              header: true,
+              dynamicTyping: true,
+              skipEmptyLines: true,
+              complete: function(results) {
+
+                  //console.log("Complete : ",results);
+                  //console.log("month : " ,results.data[0].month);
+                  jsonTot = results;
+                  console.log("Complete : ",jsonTot);
+                  console.log("month : " ,jsonTot.data[0].month);
+
+              }
+
+          });
+
+      });
+  </script>
+</head>
+<body>
+<div id="checkCSV">
+  <H3 > CHECK <span style = "color:blue"> 2100 </span> USAGE </H3>
+  <input type="file" id="txt-file" name="files"/>
+
+  <table >
+    <th>
+    <td><H4> <span style = "color:blue"> AWN </span> USAGE </H4></td>
+    <td><a href='#'
+           onclick='downloadAWNcsv({ filename: "awn_usage2018.csv" });'
+    >Download AWN usage</a></td>
+    </th>
+    <tr>
+      <td ><div class=" secondary callout ">Traffic Type</div></td>
+      <td ><div class=" secondary callout ">EXCEL</div></td>
+      <td ><div class=" secondary callout ">JAVASCRIPT</div></td>
+      <td ><div class=" secondary callout ">DIFF</div></td>
+    </tr>
+    <tr>
+      <td ><div class=" primary callout ">Voice</div></td>
+      <td ><div class=" primary callout "><h6 class="text-right">{{voiceEXCEL| totNumber}}</h6></div></td>
+      <td ><div class=" primary callout "><h6 class="text-right">{{voiceJS| totNumber}}</h6></div></td>
+      <td ><div class=" primary callout "><h6 class="text-right">{{voiceDIFF}}</h6></div></td>
+
+    </tr>
+    <tr>
+      <td ><div class=" success callout ">SMS</div></td>
+      <td ><div class=" success callout "><h6 class="text-right">{{smsEXCEL| totNumber}}</h6></div></td>
+      <td ><div class=" success callout "><h6 class="text-right">{{smsJS| totNumber}}</h6></div></td>
+      <td ><div class=" success callout "><h6 class="text-right">{{smsDIFF}}</h6></div></td>
+
+    </tr>
+    <tr>
+      <td ><div class=" warning callout ">Data</div></td>
+      <td ><div class=" warning callout "><h6 class="text-right">{{dataEXCEL| totNumber}}</h6></div></td>
+      <td ><div class=" warning callout "><h6 class="text-right">{{dataJS| totNumber}}</h6></div></td>
+      <td ><div class=" warning callout "><h6 class="text-right">{{dataDIFF}}</h6></div></td>
+
+    </tr>
+  </table>
+</div>
+<div id="checkTOT">
+  <table >
+    <th>
+    <td><H4> <span style = "color:blue"> TOT </span> USAGE </H4></td>
+    <td><a href='#'
+           onclick='downloadTOTcsv({ filename: "tot_usage2018.csv" });'
+    >Download TOT usage</a></td>
+    </th>
+    <tr>
+      <td ><div class=" secondary callout ">Traffic Type</div></td>
+      <td ><div class=" secondary callout ">EXCEL</div></td>
+      <td ><div class=" secondary callout ">JAVASCRIPT</div></td>
+      <td ><div class=" secondary callout ">DIFF</div></td>
+    </tr>
+    <tr>
+      <td ><div class=" primary callout ">Voice</div></td>
+      <td ><div class=" primary callout "><h6 class="text-right">{{voiceEXCEL| totNumber}}</h6></div></td>
+      <td ><div class=" primary callout "><h6 class="text-right">{{voiceJS| totNumber}}</h6></div></td>
+      <td ><div class=" primary callout "><h6 class="text-right">{{voiceDIFF}}</h6></div></td>
+
+    </tr>
+    <tr>
+      <td ><div class=" success callout ">SMS</div></td>
+      <td ><div class=" success callout "><h6 class="text-right">{{smsEXCEL| totNumber}}</h6></div></td>
+      <td ><div class=" success callout "><h6 class="text-right">{{smsJS| totNumber}}</h6></div></td>
+      <td ><div class=" success callout "><h6 class="text-right">{{smsDIFF}}</h6></div></td>
+
+    </tr>
+    <tr>
+      <td ><div class=" warning callout ">Data</div></td>
+      <td ><div class=" warning callout "><h6 class="text-right">{{dataEXCEL| totNumber}}</h6></div></td>
+      <td ><div class=" warning callout "><h6 class="text-right">{{dataJS| totNumber}}</h6></div></td>
+      <td ><div class=" warning callout "><h6 class="text-right">{{dataDIFF}}</h6></div></td>
+
+    </tr>
+  </table>
+  <label for="xlf">ออกรายงาน</label>
+  <input type="file" name="xlfile" id="xlf" />
+</div>
+<script>
+
+
+
+    var vm_checkCSV = new Vue({
+        el: '#checkCSV',
+        data: {
+            voiceEXCEL: 0,
+            voiceJS: 0,
+            voiceDIFF: 0,
+            smsEXCEL: 0,
+            smsJS: 0,
+            smsDIFF: 0,
+            dataEXCEL: 0,
+            dataJS: 0,
+            dataDIFF: 0
+        },
+
+    });
+    var vm_checkTOT = new Vue({
+        el: '#checkTOT',
+        data: {
+            voiceEXCEL: 0,
+            voiceJS: 0,
+            voiceDIFF: 0,
+            smsEXCEL: 0,
+            smsJS: 0,
+            smsDIFF: 0,
+            dataEXCEL: 0,
+            dataJS: 0,
+            dataDIFF: 0
+        },
+
+    });
+
+
+
+</script>
+</body>
+</html>
+
+
+
