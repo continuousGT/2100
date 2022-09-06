@@ -244,7 +244,7 @@
                       throw new Error("Malformed workbook - no !ref property");
                   }
                   console.log("before :",rangeAWN);
-                  ref = "A1:F35";
+                  // ref = "A1:F35";
                   rangeAWN.min = dc(ref.split(':')[0]);
                   rangeAWN.max = dc(ref.split(':')[1]);
                   console.log("after :",rangeAWN);
