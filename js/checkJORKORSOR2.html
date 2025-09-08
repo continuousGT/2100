@@ -296,7 +296,7 @@
                       return member.data_record !== null
                   });
                   console.log(realdata[realdata.length-1]);
-                  usage_date = formatDateAWN(realdata[2].call_date);
+                  usage_date = formatDateAWN(realdata[10].call_date);
                   console.log("Date is ",usage_date);
                   [vm_checkCSV.dataJS,vm_checkCSV.dataEXCEL,vm_checkCSV.dataDIFF] = checkSUMofData(realdata.length-1);
                   [vm_checkCSV.smsJS, vm_checkCSV.smsEXCEL, vm_checkCSV.smsDIFF] = checkSUMofSMS(realdata,realdata.length-1);
@@ -436,7 +436,7 @@
                   });
 
                   console.log(realdataTOT[realdataTOT.length-1]);
-                  usage_dateTOT = formatDate(realdataTOT[2].call_date);
+                  usage_dateTOT = formatDate(realdataTOT[10].call_date);
                   console.log("Date is ",usage_dateTOT);
                   [vm_checkTOT.dataJS,vm_checkTOT.dataEXCEL,vm_checkTOT.dataDIFF] = checkSUMofDataTOT(realdataTOT.length-1);
                   [vm_checkTOT.smsJS, vm_checkTOT.smsEXCEL, vm_checkTOT.smsDIFF] = checkSUMofSMS(realdataTOT,realdataTOT.length-1);
